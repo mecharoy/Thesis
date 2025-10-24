@@ -1,0 +1,82 @@
+2025-10-18 00:34:21,297 [INFO] - LFSM AE Pre-training: 194.84 seconds (3.25 minutes)
+2025-10-18 00:34:21,297 [INFO] - MFSM AE Fine-tuning: 29.52 seconds (0.49 minutes)
+2025-10-18 00:34:21,297 [INFO] - XGBoost Phase 1 (LFSM): 482.33 seconds (8.04 minutes)
+2025-10-18 00:34:21,297 [INFO] - XGBoost Phase 2 (Fine-tuning): 486.35 seconds (8.11 minutes)
+2025-10-18 00:34:21,297 [INFO] - Total Training Time: 1193.04 seconds (19.88 minutes)
+
+
+
+============================================================
+2025-10-18 00:29:17,184 [INFO] - PHASE 5: EVALUATION ON 2D TEST DATA
+2025-10-18 00:29:17,184 [INFO] - ============================================================
+2025-10-18 00:29:17,184 [INFO] - --- Evaluating on MFSM_Test data ---
+2025-10-18 00:29:17,199 [INFO] - Extracting latent vectors using the trained encoder.
+2025-10-18 00:29:20,248 [INFO] - MFSM_Test Evaluation Results:
+2025-10-18 00:29:20,248 [INFO] -   Latent Space R²: 0.9271
+2025-10-18 00:29:20,248 [INFO] -   === FULL METRICS (inflated by zeros/baseline) ===
+2025-10-18 00:29:20,248 [INFO] -   Time Series R² (Full): 0.9713
+2025-10-18 00:29:20,248 [INFO] -   Time Series R² (Per-sample mean±std): 0.9738±0.0431
+2025-10-18 00:29:20,248 [INFO] -   Time Series MSE (Full): 0.001553
+2025-10-18 00:29:20,248 [INFO] -   Time Series NMSE (Full): 2.6150%
+2025-10-18 00:29:20,248 [INFO] -   === ROI METRICS (dynamic regions only - TRUE PERFORMANCE) ===
+2025-10-18 00:29:20,248 [INFO] -   Time Series R² (ROI): 0.9741 ← PRIMARY METRIC
+2025-10-18 00:29:20,248 [INFO] -   Time Series NMSE (ROI): 2.5916%
+2025-10-18 00:29:20,248 [INFO] -   ROI R² range: [0.7221, 0.9993]
+2025-10-18 00:29:20,248 [INFO] - 
+============================================================
+2025-10-18 00:29:20,248 [INFO] - PHASE 6: GENERATING OUTPUTS AND VISUALIZATIONS
+2025-10-18 00:29:20,248 [INFO] - ============================================================
+2025-10-18 00:29:25,701 [INFO] - Saved interleaved MFSM predictions: /home/user2/Music/abhi3/test/mfsm_interleaved_test.csv with shape (1518, 1508)
+2025-10-18 00:29:25,701 [INFO] - Format: 759 parameter sets, each with ground_truth + mfsm_prediction rows
+2025-10-18 00:29:25,701 [INFO] - Time column format: r_0 ... r_1499
+2025-10-18 00:29:25,726 [INFO] - --- Creating comparison plots for MFSM_Test data ---
+2025-10-18 00:29:26,165 [INFO] - Creating individual comparison plots for all 759 samples...
+2025-10-18 00:32:01,769 [INFO] - Saved 759 individual comparison plots to /home/user2/Music/abhi3/test/individual_plots
+2025-10-18 00:32:05,067 [INFO] - Saved best predictions plot: /home/user2/Music/abhi3/test/mfsm_comparison_plots_best_10_mfsm_test.png
+2025-10-18 00:32:08,520 [INFO] - Saved worst predictions plot: /home/user2/Music/abhi3/test/mfsm_comparison_plots_worst_10_mfsm_test.png
+2025-10-18 00:32:08,520 [INFO] - Creating individual R2 histograms for all 759 samples...
+2025-10-18 00:34:18,917 [INFO] - Saved 759 individual R2 histograms to /home/user2/Music/abhi3/test/individual_histograms
+2025-10-18 00:34:19,260 [INFO] - Saved overall R2 histogram: /home/user2/Music/abhi3/test/per_sample_r2_histogram_mfsm_test.png
+2025-10-18 00:34:20,839 [INFO] - Saved summary plot: /home/user2/Music/abhi3/test/mfsm_comparison_summary_mfsm_test.png
+2025-10-18 00:34:20,839 [INFO] - MFSM_Test Comparison Statistics:
+2025-10-18 00:34:20,839 [INFO] -   === ROI R² (PRIMARY METRIC) ===
+2025-10-18 00:34:20,840 [INFO] -   Best ROI R² scores: [0.99932692 0.9992274  0.99920653 0.99915539 0.99913577 0.99910737
+ 0.99910694 0.9991047  0.9990904  0.99903648]
+2025-10-18 00:34:20,840 [INFO] -   Worst ROI R² scores: [0.72214865 0.77800051 0.78460318 0.78488475 0.78610335 0.78634701
+ 0.79477131 0.79499753 0.79763519 0.80096297]
+2025-10-18 00:34:20,840 [INFO] -   Mean ROI R² (all): 0.9741
+2025-10-18 00:34:20,840 [INFO] -   Std ROI R² (all): 0.0430
+2025-10-18 00:34:20,840 [INFO] -   === Full R² (for comparison) ===
+2025-10-18 00:34:20,840 [INFO] -   Mean Full R² (all): 0.9738
+2025-10-18 00:34:20,840 [INFO] -   Difference (Full - ROI): -0.0002
+2025-10-18 00:34:20,840 [INFO] -   === Per-Sample Analysis ===
+2025-10-18 00:34:20,840 [INFO] -   Per-sample R² range: [0.7219, 0.9992]
+2025-10-18 00:34:20,840 [INFO] -   Per-sample R² std: 0.0431
+2025-10-18 00:34:20,840 [INFO] - 
+============================================================
+2025-10-18 00:34:20,840 [INFO] - PHASE 6.5: FINAL AUTOENCODER RECONSTRUCTION EVALUATION
+2025-10-18 00:34:20,840 [INFO] - ============================================================
+2025-10-18 00:34:20,840 [INFO] - --- Evaluating AE Reconstruction on MFSM Train (AE Only) ---
+2025-10-18 00:34:21,295 [INFO] - AE Reconstruction - MFSM Train (AE Only): R²=0.979424
+2025-10-18 00:34:21,296 [INFO] - 
+============================================================
+2025-10-18 00:34:21,296 [INFO] - FINAL SUMMARY
+2025-10-18 00:34:21,296 [INFO] - ============================================================
+2025-10-18 00:34:21,296 [INFO] - TRAINING STRATEGY:
+2025-10-18 00:34:21,296 [INFO] -   ✓ Trained AutoEncoder from scratch (USE_EXISTING_MODELS=False)
+2025-10-18 00:34:21,296 [INFO] -   1. LFSM Pre-training: 8393 samples from 1D zigzag theory (loss weight: 1.0x)
+2025-10-18 00:34:21,296 [INFO] -   2. MFSM Fine-tuning: 1375 samples from 2D FEM (loss weight: 3.0x)
+2025-10-18 00:34:21,296 [INFO] -   3. XGBoost Phase 1: Training on LFSM latent vectors
+2025-10-18 00:34:21,296 [INFO] -   4. XGBoost Phase 2: Fine-tuning on combined LFSM+HFSM data (HFSM weight: 3.0x)
+2025-10-18 00:34:21,296 [INFO] -   5. Final Testing: 759 samples from 2D FEM
+2025-10-18 00:34:21,296 [INFO] - 
+2025-10-18 00:34:21,296 [INFO] - AUTOENCODER RECONSTRUCTION QUALITY (R²):
+2025-10-18 00:34:21,296 [INFO] -   LFSM Pre-trained (AE Only): R²=0.9825
+2025-10-18 00:34:21,296 [INFO] -   MFSM Fine-tuned (AE Only): R²=0.9794
+2025-10-18 00:34:21,296 [INFO] - 
+2025-10-18 00:34:21,296 [INFO] - MFSM Test Results:
+2025-10-18 00:34:21,296 [INFO] -   R² (Full): 0.9713, NMSE (Full): 2.6150%
+2025-10-18 00:34:21,296 [INFO] -   R² (Per-sample mean±std): 0.9738±0.0431
+2025-10-18 00:34:21,296 [INFO] -   R² (ROI): 0.9741 ← PRIMARY METRIC, NMSE (ROI): 2.5916%
+2025-10-18 00:34:21,296 [INFO] -   Best ROI R² range: 0.9990 to 0.9993
+2025-10-18 00:34:21,296 [INFO] -   Worst ROI R² range: 0.7221 to 0.8010

@@ -1,0 +1,217 @@
+2025-10-17 23:48:37,820 [INFO] -     notch_x:
+2025-10-17 23:48:37,820 [INFO] -       True:      1.835500
+2025-10-17 23:48:37,820 [INFO] -       Estimated: 1.835500
+2025-10-17 23:48:37,820 [INFO] -       Abs Error: 0.000000
+2025-10-17 23:48:37,820 [INFO] -       Rel Error: 0.00%
+2025-10-17 23:48:37,820 [INFO] -     notch_depth:
+2025-10-17 23:48:37,820 [INFO] -       True:      0.001000
+2025-10-17 23:48:37,820 [INFO] -       Estimated: 0.000980
+2025-10-17 23:48:37,820 [INFO] -       Abs Error: 0.000020
+2025-10-17 23:48:37,820 [INFO] -       Rel Error: 1.95%
+2025-10-17 23:48:37,820 [INFO] -     notch_width:
+2025-10-17 23:48:37,820 [INFO] -       True:      0.001200
+2025-10-17 23:48:37,820 [INFO] -       Estimated: 0.000461
+2025-10-17 23:48:37,820 [INFO] -       Abs Error: 0.000739
+2025-10-17 23:48:37,820 [INFO] -       Rel Error: 61.56%
+
+
+2025-10-17 23:20:42,024 [INFO] -     notch_x:
+2025-10-17 23:20:42,024 [INFO] -       True:      1.809640
+2025-10-17 23:20:42,024 [INFO] -       Estimated: 1.833861
+2025-10-17 23:20:42,024 [INFO] -       Abs Error: 0.024221
+2025-10-17 23:20:42,024 [INFO] -       Rel Error: 1.34%
+2025-10-17 23:20:42,024 [INFO] -     notch_depth:
+2025-10-17 23:20:42,024 [INFO] -       True:      0.000280
+2025-10-17 23:20:42,024 [INFO] -       Estimated: 0.000466
+2025-10-17 23:20:42,024 [INFO] -       Abs Error: 0.000186
+2025-10-17 23:20:42,024 [INFO] -       Rel Error: 66.59%
+2025-10-17 23:20:42,024 [INFO] -     notch_width:
+2025-10-17 23:20:42,024 [INFO] -       True:      0.000760
+2025-10-17 23:20:42,024 [INFO] -       Estimated: 0.000258
+2025-10-17 23:20:42,024 [INFO] -       Abs Error: 0.000502
+2025-10-17 23:20:42,024 [INFO] -       Rel Error: 65.99%
+
+
+2025-10-17 22:43:15,915 [INFO] -     notch_x:
+2025-10-17 22:43:15,915 [INFO] -       True:      1.757930
+2025-10-17 22:43:15,915 [INFO] -       Estimated: 1.817813
+2025-10-17 22:43:15,915 [INFO] -       Abs Error: 0.059883
+2025-10-17 22:43:15,915 [INFO] -       Rel Error: 3.41%
+2025-10-17 22:43:15,915 [INFO] -     notch_depth:
+2025-10-17 22:43:15,915 [INFO] -       True:      0.000460
+2025-10-17 22:43:15,915 [INFO] -       Estimated: 0.000464
+2025-10-17 22:43:15,915 [INFO] -       Abs Error: 0.000004
+2025-10-17 22:43:15,915 [INFO] -       Rel Error: 0.90%
+2025-10-17 22:43:15,915 [INFO] -     notch_width:
+2025-10-17 22:43:15,915 [INFO] -       True:      0.000980
+2025-10-17 22:43:15,915 [INFO] -       Estimated: 0.000524
+2025-10-17 22:43:15,915 [INFO] -       Abs Error: 0.000456
+2025-10-17 22:43:15,915 [INFO] -       Rel Error: 46.52%
+
+
+2025-10-17 22:15:09,815 [INFO] -     notch_x:
+2025-10-17 22:15:09,815 [INFO] -       True:      1.680360
+2025-10-17 22:15:09,815 [INFO] -       Estimated: 1.680670
+2025-10-17 22:15:09,815 [INFO] -       Abs Error: 0.000310
+2025-10-17 22:15:09,815 [INFO] -       Rel Error: 0.02%
+2025-10-17 22:15:09,815 [INFO] -     notch_depth:
+2025-10-17 22:15:09,815 [INFO] -       True:      0.000820
+2025-10-17 22:15:09,815 [INFO] -       Estimated: 0.000990
+2025-10-17 22:15:09,816 [INFO] -       Abs Error: 0.000170
+2025-10-17 22:15:09,816 [INFO] -       Rel Error: 20.72%
+2025-10-17 22:15:09,816 [INFO] -     notch_width:
+2025-10-17 22:15:09,816 [INFO] -       True:      0.001200
+2025-10-17 22:15:09,816 [INFO] -       Estimated: 0.000390
+2025-10-17 22:15:09,816 [INFO] -       Abs Error: 0.000810
+2025-10-17 22:15:09,816 [INFO] -       Rel Error: 67.50%
+
+
+2025-10-17 21:32:00,730 [INFO] -     notch_x:
+2025-10-17 21:32:00,730 [INFO] -       True:      1.732070
+2025-10-17 21:32:00,730 [INFO] -       Estimated: 1.733070
+2025-10-17 21:32:00,730 [INFO] -       Abs Error: 0.001000
+2025-10-17 21:32:00,730 [INFO] -       Rel Error: 0.06%
+2025-10-17 21:32:00,730 [INFO] -     notch_depth:
+2025-10-17 21:32:00,730 [INFO] -       True:      0.000280
+2025-10-17 21:32:00,730 [INFO] -       Estimated: 0.000284
+2025-10-17 21:32:00,730 [INFO] -       Abs Error: 0.000004
+2025-10-17 21:32:00,730 [INFO] -       Rel Error: 1.40%
+2025-10-17 21:32:00,730 [INFO] -     notch_width:
+2025-10-17 21:32:00,730 [INFO] -       True:      0.000760
+2025-10-17 21:32:00,730 [INFO] -       Estimated: 0.000742
+2025-10-17 21:32:00,730 [INFO] -       Abs Error: 0.000018
+2025-10-17 21:32:00,730 [INFO] -       Rel Error: 2.40%
+
+
+2025-10-17 20:55:12,038 [INFO] -     notch_x:
+2025-10-17 20:55:12,038 [INFO] -       True:      1.757930
+2025-10-17 20:55:12,038 [INFO] -       Estimated: 1.758124
+2025-10-17 20:55:12,038 [INFO] -       Abs Error: 0.000194
+2025-10-17 20:55:12,038 [INFO] -       Rel Error: 0.01%
+2025-10-17 20:55:12,038 [INFO] -     notch_depth:
+2025-10-17 20:55:12,038 [INFO] -       True:      0.000820
+2025-10-17 20:55:12,038 [INFO] -       Estimated: 0.000632
+2025-10-17 20:55:12,038 [INFO] -       Abs Error: 0.000188
+2025-10-17 20:55:12,038 [INFO] -       Rel Error: 22.91%
+2025-10-17 20:55:12,038 [INFO] -     notch_width:
+2025-10-17 20:55:12,038 [INFO] -       True:      0.000980
+2025-10-17 20:55:12,038 [INFO] -       Estimated: 0.000990
+2025-10-17 20:55:12,038 [INFO] -       Abs Error: 0.000010
+2025-10-17 20:55:12,038 [INFO] -       Rel Error: 1.03%
+
+
+2025-10-18 00:41:18,940 [INFO] -       True:      1.732070
+2025-10-18 00:41:18,940 [INFO] -       Estimated: 1.835500
+2025-10-18 00:41:18,940 [INFO] -       Abs Error: 0.103430
+2025-10-18 00:41:18,940 [INFO] -       Rel Error: 5.97%
+2025-10-18 00:41:18,940 [INFO] -     notch_depth:
+2025-10-18 00:41:18,940 [INFO] -       True:      0.000640
+2025-10-18 00:41:18,940 [INFO] -       Estimated: 0.000464
+2025-10-18 00:41:18,940 [INFO] -       Abs Error: 0.000176
+2025-10-18 00:41:18,940 [INFO] -       Rel Error: 27.48%
+2025-10-18 00:41:18,940 [INFO] -     notch_width:
+2025-10-18 00:41:18,941 [INFO] -       True:      0.000320
+2025-10-18 00:41:18,941 [INFO] -       Estimated: 0.000100
+2025-10-18 00:41:18,941 [INFO] -       Abs Error: 0.000220
+2025-10-18 00:41:18,941 [INFO] -       Rel Error: 68.75%
+
+
+📊 ESTIMATED vs TRUE PARAMETERS:
+2025-10-18 00:38:11,607 [INFO] -     notch_x:
+2025-10-18 00:38:11,607 [INFO] -       True:      1.706210
+2025-10-18 00:38:11,607 [INFO] -       Estimated: 1.706613
+2025-10-18 00:38:11,607 [INFO] -       Abs Error: 0.000403
+2025-10-18 00:38:11,607 [INFO] -       Rel Error: 0.02%
+2025-10-18 00:38:11,607 [INFO] -     notch_depth:
+2025-10-18 00:38:11,607 [INFO] -       True:      0.000640
+2025-10-18 00:38:11,607 [INFO] -       Estimated: 0.000822
+2025-10-18 00:38:11,607 [INFO] -       Abs Error: 0.000182
+2025-10-18 00:38:11,607 [INFO] -       Rel Error: 28.44%
+2025-10-18 00:38:11,607 [INFO] -     notch_width:
+2025-10-18 00:38:11,607 [INFO] -       True:      0.001200
+2025-10-18 00:38:11,607 [INFO] -       Estimated: 0.000566
+2025-10-18 00:38:11,607 [INFO] -       Abs Error: 0.000634
+2025-10-18 00:38:11,607 [INFO] -       Rel Error: 52.87%
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 09:41:37,120 [INFO] -     notch_x:     True: 1.732070, Estimated: 1.733925
+2025-10-18 09:41:37,120 [INFO] -     notch_depth: True: 0.000820, Estimated: 0.000845
+2025-10-18 09:41:37,120 [INFO] -     notch_width: True: 0.000540, Estimated: 0.000557
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 07:36:28,806 [INFO] -     notch_x:     True: 1.680360, Estimated: 1.680660
+2025-10-18 07:36:28,806 [INFO] -     notch_depth: True: 0.001000, Estimated: 0.000994
+2025-10-18 07:36:28,806 [INFO] -     notch_width: True: 0.001200, Estimated: 0.000767
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 05:31:06,316 [INFO] -     notch_x:     True: 1.809640, Estimated: 1.810648
+2025-10-18 05:31:06,316 [INFO] -     notch_depth: True: 0.000640, Estimated: 0.000629
+2025-10-18 05:31:06,316 [INFO] -     notch_width: True: 0.000540, Estimated: 0.000772
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 03:25:50,571 [INFO] -     notch_x:     True: 1.809640, Estimated: 1.665429
+2025-10-18 03:25:50,571 [INFO] -     notch_depth: True: 0.000280, Estimated: 0.000664
+2025-10-18 03:25:50,571 [INFO] -     notch_width: True: 0.000760, Estimated: 0.000190
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 08:33:14,886 [INFO] -     notch_x:     True: 1.680360, Estimated: 1.676649
+2025-10-18 08:33:14,886 [INFO] -     notch_depth: True: 0.000820, Estimated: 0.000834
+2025-10-18 08:33:14,886 [INFO] -     notch_width: True: 0.000980, Estimated: 0.001042
+
+2025-10-18 13:50:24,382 [INFO] -     notch_x:     True: 1.680360, Estimated: 1.732943
+2025-10-18 13:50:24,382 [INFO] -     notch_depth: True: 0.001000, Estimated: 0.000113
+2025-10-18 13:50:24,382 [INFO] -     notch_width: True: 0.000100, Estimated: 0.000271
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 15:53:56,779 [INFO] -     notch_x:     True: 1.706210, Estimated: 1.704678
+2025-10-18 15:53:56,779 [INFO] -     notch_depth: True: 0.000820, Estimated: 0.000982
+2025-10-18 15:53:56,779 [INFO] -     notch_width: True: 0.000100, Estimated: 0.000160
+
+📊 ESTIMATED vs TRUE PARAMETERS:
+2025-10-18 17:35:22,895 [INFO] -     notch_x:
+2025-10-18 17:35:22,895 [INFO] -       True:      1.680360
+2025-10-18 17:35:22,895 [INFO] -       Estimated: 1.680132
+2025-10-18 17:35:22,895 [INFO] -       Abs Error: 0.000228
+2025-10-18 17:35:22,895 [INFO] -       Rel Error: 0.01%
+2025-10-18 17:35:22,895 [INFO] -     notch_depth:
+2025-10-18 17:35:22,895 [INFO] -       True:      0.000820
+2025-10-18 17:35:22,895 [INFO] -       Estimated: 0.000995
+2025-10-18 17:35:22,895 [INFO] -       Abs Error: 0.000175
+2025-10-18 17:35:22,895 [INFO] -       Rel Error: 21.32%
+2025-10-18 17:35:22,895 [INFO] -     notch_width:
+2025-10-18 17:35:22,895 [INFO] -       True:      0.000980
+2025-10-18 17:35:22,895 [INFO] -       Estimated: 0.000398
+2025-10-18 17:35:22,895 [INFO] -       Abs Error: 0.000582
+2025-10-18 17:35:22,895 [INFO] -       Rel Error: 59.35%
+
+📊 ESTIMATED vs TRUE PARAMETERS:
+2025-10-18 17:44:29,366 [INFO] -     notch_x:
+2025-10-18 17:44:29,366 [INFO] -       True:      1.835500
+2025-10-18 17:44:29,366 [INFO] -       Estimated: 1.854500
+2025-10-18 17:44:29,366 [INFO] -       Abs Error: 0.181000
+2025-10-18 17:44:29,366 [INFO] -       Rel Error: 1.86%
+2025-10-18 17:44:29,366 [INFO] -     notch_depth:
+2025-10-18 17:44:29,366 [INFO] -       True:      0.000640
+2025-10-18 17:44:29,366 [INFO] -       Estimated: 0.000215
+2025-10-18 17:44:29,366 [INFO] -       Abs Error: 0.000425
+2025-10-18 17:44:29,367 [INFO] -       Rel Error: 66.34%
+2025-10-18 17:44:29,367 [INFO] -     notch_width:
+2025-10-18 17:44:29,367 [INFO] -       True:      0.000100
+2025-10-18 17:44:29,367 [INFO] -       Estimated: 0.000100
+2025-10-18 17:44:29,367 [INFO] -       Abs Error: 0.000000
+2025-10-18 17:44:29,367 [INFO] -       Rel Error: 0.00%
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 18:15:19,865 [INFO] -     notch_x:     True: 1.835500, Estimated: 1.835500
+2025-10-18 18:15:19,865 [INFO] -     notch_depth: True: 0.000820, Estimated: 0.000827
+2025-10-18 18:15:19,865 [INFO] -     notch_width: True: 0.000540, Estimated: 0.000980
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 20:04:36,349 [INFO] -     notch_x:     True: 1.732070, Estimated: 1.732515
+2025-10-18 20:04:36,349 [INFO] -     notch_depth: True: 0.000820, Estimated: 0.000870
+2025-10-18 20:04:36,349 [INFO] -     notch_width: True: 0.000540, Estimated: 0.000553
+
+📊 ESTIMATED vs TRUE PARAMETERS (Best Found):
+2025-10-18 22:02:54,657 [INFO] -     notch_x:     True: 1.809640, Estimated: 1.809645
+2025-10-18 22:02:54,657 [INFO] -     notch_depth: True: 0.000460, Estimated: 0.000465
+2025-10-18 22:02:54,657 [INFO] -     notch_width: True: 0.000320, Estimated: 0.000727

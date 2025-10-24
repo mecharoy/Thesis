@@ -1,0 +1,1584 @@
+\documentclass[12pt,a4paper]{report}
+
+% Essential packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{enumitem}
+
+% Page geometry
+\geometry{
+    left=3cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+% Line spacing
+\onehalfspacing
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{\leftmark}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Chapter and section formatting
+\titleformat{\chapter}[display]
+{\normalfont\Large\bfseries\centering}{\chaptertitlename\ \thechapter}{20pt}{\Large}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
+
+% Hyperref settings
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+    citecolor=black,
+    pdftitle={Master's Synopsis},
+    pdfauthor={Your Name},
+}
+
+% Custom commands
+\newcommand{\university}{Indian Institute of Technology, Delhi}
+\newcommand{\department}{Department of Applied Mechanics}
+\newcommand{\degree}{Master of Science by Research}
+\newcommand{\specialization}{Surrogate Modelling and Discrepancy Learning}
+\newcommand{\thesistitle}{Multi-Fidelity Surrogate Modeling for Structural Response Prediction: Integrating 1D Zigzag Theory with Deep Learning for Enhanced Computational Efficiency}
+\newcommand{\authorname}{Abhijit Roy Choudhury}
+\newcommand{\rollnumber}{2023AMY7542}
+\newcommand{\supervisor}{Dr. Rajdip Nayek}
+\newcommand{\cosupervisor}{Dr. Souvik Chakroborty} 
+\newcommand{\submissiondate}{Aug, 2025}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{-1.5cm}
+
+% Top line
+\rule{\textwidth}{0.6pt} \\[0.4cm]
+
+% Title - Bigger and bold
+{\LARGE \textbf{Multi-Fidelity Surrogate Modeling for Structural Response Prediction:}}\\[0.3cm]
+{\Large \textbf{Integrating 1D Zigzag Theory with Deep Learning for}}\\[0.1cm]
+{\Large \textbf{Enhanced Computational Efficiency}} \\[0.4cm]
+
+\rule{\textwidth}{0.6pt} \\[0.05cm]
+
+% Report type
+{\large \textsc{A SYNOPSIS REPORT}}\\[0.4cm]
+{\normalsize Submitted in Partial Fulfillment of the Requirements\\
+for the Degree of}\\[0.3cm]
+
+{\large \textbf{Master of Science}}\\
+{\large (by Research)}\\[0.1cm]
+
+% Author details
+\large by\\[0.3cm]
+{\Large \textbf{Abhijit Roy Choudhury}}\\[0.1cm]
+{\normalsize Roll No: \texttt{2023AMY7542}}\\
+\texttt{2023amy7542@iitd.ac.in} \\[0.5cm]
+
+% Supervisor details
+{\normalsize Under the supervision of}\\[0.3cm]
+{\large \textbf{Dr. Rajdip Nayek}}\\
+{\large and}\\
+{\large \textbf{Dr. Souvik Chakroborty}}\\[0.7cm]
+
+% Institute Seal (logo placeholder)
+\includegraphics[width=4.2cm]{iit.png} \\[0.7cm]
+
+% Bottom info
+{\large NOVEMBER 2025} \\[0.3cm]
+{\large \textbf{Department of Applied Mechanics}}\\
+{\large \textbf{Indian Institute of Technology Delhi}}
+
+\end{titlepage}
+
+
+
+
+% Abstract
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+% Add your abstract here - brief summary of the work, methodology, key findings
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% List of Figures
+\listoffigures
+\newpage
+
+% List of Tables
+\listoftables
+\newpage
+
+% List of Abbreviations (optional)
+\chapter*{List of Abbreviations}
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+\begin{tabular}{ll}
+% AI & Artificial Intelligence \\
+% ML & Machine Learning \\
+% Add your abbreviations here
+\end{tabular}
+\newpage
+
+% Main Content Begins
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% Chapter 1: Introduction
+\chapter{Introduction}
+\label{chap:introduction}
+
+Structural response prediction constitutes a fundamental challenge in engineering analysis, where the persistent trade-off between computational accuracy and efficiency drives continuous methodological innovation. Modern engineering structures demand precise prediction of mechanical behavior under diverse loading and material conditions, yet traditional high-fidelity computational approaches often require prohibitive computational resources for real-time applications and design optimization scenarios. This computational burden has necessitated the development of multi-fidelity surrogate modeling techniques that can achieve both efficiency and accuracy through intelligent integration of machine learning methodologies.
+One-dimensional zigzag theories, originally developed for composite laminated structures, have demonstrated exceptional accuracy in capturing complex deformation patterns while maintaining computational efficiency through reduced degrees of freedom. The Refined Zigzag Theory achieves two-dimensional accuracy with one-dimensional computational cost through innovative displacement field representations that eliminate shear correction factors. However, the application of these theories to homogeneous materials with geometric discontinuities, particularly notched beams, represents a novel extension requiring systematic validation against established finite element methodologies.
+Contemporary advances in deep learning architectures, especially convolutional neural networks and multi-fidelity deep neural networks, have revolutionized surrogate modeling by enabling the capture of complex nonlinear relationships between different fidelity data sources. The U-Net architecture, characterized by its encoder-decoder structure and skip connections, has proven exceptionally effective for spatial field reconstruction, making it particularly suitable for bridging discrepancies between fidelity levels in structural analysis.
+This research addresses the critical challenge of analyzing discrepancies between one-dimensional zigzag beam models and two-dimensional finite element methods applied to homogeneous beams with rectangular notch configurations. The study introduces a novel cascaded multi-fidelity approach leveraging a sophisticated two-stage deep learning architecture to enhance predictive capabilities while maintaining computational efficiency. The proposed methodology employs a pre-trained Conditional Autoencoder combined with XGBoost regression to generate one-dimensional structural responses from beam and crack parameters, followed by a U-Net architecture with attention mechanisms that transforms these intermediate representations into accurate two-dimensional response predictions.
+The investigation systematically analyzes and documents discrepancies between one-dimensional zigzag theory and corresponding two-dimensional finite element solutions through this innovative multi-stage learning framework. The first stage utilizes a pre-trained CAE-XGBoost architecture that efficiently regenerates one-dimensional responses from input parameters describing beam geometry and crack characteristics. These regenerated responses serve as intermediate feature representations subsequently processed by the attention-enhanced U-Net to predict accurate two-dimensional structural responses using limited high-fidelity training data.
+This cascaded approach represents a significant methodological advancement over traditional multi-fidelity techniques by leveraging learned representations from low-fidelity models rather than direct physical simulations. The methodology is validated against a High-Fidelity Surrogate Model trained on identical limited two-dimensional data, providing comprehensive performance comparisons. The proposed framework represents a convergence of classical structural theories with artificial intelligence techniques, creating an intelligent system for adaptive structural analysis that efficiently bridges the gap between computationally efficient one-dimensional models and accurate two-dimensional predictions.
+Beyond forward prediction capabilities, this research extends the multi-fidelity framework to address the inverse problem of notch parameter identification from measured structural responses. The inverse solution methodology employs the developed Multi-Fidelity Surrogate Model as a computationally efficient forward solver within a differential evolution optimization framework. This inverse problem formulation enables determination of unknown notch characteristics—including location, depth, and width—from observed displacement measurements, representing a critical capability for structural health monitoring and damage detection applications. The optimization strategy incorporates strategic population initialization, distributing search efforts across high-confidence regions informed by training data while maintaining exploration capabilities in extended parameter spaces. Recent advances in surrogate-assisted inverse problems have demonstrated significant improvements in computational efficiency for structural condition assessment, with clustering-driven incremental learning strategies reducing evaluation costs while maintaining solution accuracy. This integration of surrogate modeling with evolutionary optimization algorithms addresses the fundamental challenge of expensive function evaluations inherent in traditional inverse problem solutions, enabling real-time parameter identification essential for autonomous structural diagnosis systems.
+The significance of this work extends beyond immediate computational benefits, contributing to the broader paradigm shift toward intelligent structural analysis systems capable of adapting to diverse geometric configurations while maintaining physical consistency. This research establishes foundations for real-time structural health monitoring, autonomous design optimization, and predictive maintenance capabilities essential for next-generation infrastructure systems.
+
+\section{Motivation}
+\label{sec:motivation}
+Multi-fidelity surrogate modeling for structural response prediction has achieved remarkable computational breakthroughs in the past five years, with demonstrated speed-ups of \(10^{6}\) to \(10^{7}\) times.
+\href{https://doi.org/10.1103/PhysRevAccelBeams.23.044601}{[1]} while maintaining engineering accuracy.\href{https://doi.org/10.48550/arXiv.2105.00856}{[2]} 
+ Physics-informed neural networks combined with multi-level decomposition strategies now achieve 0.5-2\% error rates for complex structural mechanics problems, while advanced integration approaches between classical theories like zigzag theory and deep learning architectures enable real-time structural analysis capabilities\href{https://www.researchgate.net/publication/358749953_Extended_Physics-Informed_Neural_Networks_for_Solving_Fluid_Flow_Problems_in_Highly_Heterogeneous_Media}{[2.5]}. However, critical research gaps persist in applying these methods to homogeneous structures with geometric discontinuities, particularly in dimensional scalability beyond 32 dimensions and real-time wave propagation analysis. The engineering significance extends far beyond computational gains, as these multi-fidelity approaches enable real-time structural health monitoring for critical infrastructure, autonomous damage detection systems, and predictive maintenance frameworks that were previously computationally intractable.\href{https://doi.org/10.3390/s23063293}{[3]}
+ Research from 2020-2025 demonstrates exponential growth in applications, with marine and aerospace sectors leading adoption due to the critical need for continuous structural monitoring in harsh environments.\href{https://doi.org/10.3390/s20102778}{[4]}
+ The mathematical foundation built on established theories like the Kapuria-Hagedorn framework and Refined Zigzag Theory provides the necessary theoretical rigor\href{http://dx.doi.org/10.2140/jomms.2007.2.1267}{[5]},while emerging machine learning integration strategies offer unprecedented opportunities for bridging classical structural mechanics with modern computational approaches.
+
+The mathematical foundation for multi-fidelity structural analysis rests on well-established theories that have demonstrated exceptional accuracy and efficiency across diverse applications. Refined Zigzag Theory (RZT) maintains constant degrees of freedom regardless of layer count while eliminating the need for transverse-shear correction factors, making it ideally suited as a low-fidelity model in multi-fidelity frameworks.\href{https://ntrs.nasa.gov/citations/20090007494}{[6]} The theory's multi-scale approach expresses in-plane displacement fields as superpositions of coarse and fine contributions\href{https://ntrs.nasa.gov/citations/20090007494}{[6]}\href{https://ntrs.nasa.gov/citations/20100013955}{[7]}, enabling efficient capture of layerwise effects without computational penalties.The Kapuria-Hagedorn framework offers a unified, efficient formulation for layerwise theories, capturing both extension and shear effects using third-order zigzag axial displacement with only three primary variables.\href{http://dx.doi.org/10.2140/jomms.2007.2.1267}{[5]} This significantly reduces computational complexity while preserving physical accuracy, making it well-suited for integration with machine learning models that benefit from low-dimensional parametric representations\href{https://www.sciencedirect.com/science/article/pii/S0045793018304250}{[7.5]}.
+Recent extensions of zigzag theory to homogeneous materials with geometric discontinuities—such as aluminum beams with rectangular notches—treat these discontinuities as virtual interfaces via infinitesimal perturbations in transverse shear \href{https://ntrs.nasa.gov/citations/20100013955}{[7]}. This enables zigzag kinematics in otherwise homogeneous media, though the approach remains less developed than in composite applications.
+Advances in mixed-dimensional coupling between 1D beam theories and 2D finite elements have shown strong potential, offering accuracy and computational efficiency without introducing spurious stresses at transition zones. However, standardization and commercial integration of these methods remain limited.
+Modeling notches as virtual layer discontinuities is particularly promising, allowing for slope discontinuities while maintaining displacement continuity. Though validated for end-notched and V-notched beams, its application to rectangular notches in homogeneous aluminum beams remains an open area for further \href{https://www.sciencedirect.com/science/article/pii/S0022460X24000774}{[7.6]}.
+
+The period 2020-2025 has witnessed paradigmatic shifts in finite element methodology, with FEM-enhanced neural networks (FEM-NN) emerging as the most significant breakthrough\href{https://www.sciencedirect.com/science/article/pii/S2352012422000947}{[7.7]}. Computational efficiency gains have been substantial across multiple fronts. Modern GPU acceleration implementations achieve sub-second matrix assembly for 2-million degree-of-freedom systems, while commercial solutions like Ansys Mechanical 2025 R2 demonstrate up to 13× speedup on large transient models through mixed solver approaches\href{https://amses-journal.springeropen.com/articles/10.1186/s40323-023-00243-1}{[7.8]}. These physics-conforming surrogate models eliminate expensive pre-calculated simulation datasets by incorporating discretized PDE forms directly into loss functions\href{https://amses-journal.springeropen.com/articles/10.1186/s40323-023-00243-1}{[7.8]}. Computational efficiency gains have been substantial across multiple fronts. Modern GPU acceleration implementations achieve sub-second matrix assembly for 2-million degree-of-freedom systems, while commercial solutions like Ansys Mechanical 2025 R2 demonstrate up to 13× speedup on large transient models through mixed solver approaches\href{https://www.researchgate.net/publication/236634336_GPU_acceleration_for_FEM-based_structural_analysis}{[7.9]}. The emergence of AI-integrated workflows, including Ansys Copilot for in-context engineering support, signals the democratization of advanced simulation capabilities. 
+
+For structures with notches and discontinuities, geometrically exact beam theory with embedded strong discontinuities (Tojaga et al., 2023) provides breakthrough capabilities for failure modeling with large deformations\href{https://www.sciencedirect.com/science/article/pii/S0045782523001378}{[7.10]}\href{https://www.researchgate.net/publication/367973333_Geometrically_Exact_Beam_Theory_with_Embedded_Strong_Discontinuities_for_the_Modeling_of_Failure_in_Structures_Part_I_Formulation_and_Finite_Element_Implementation}{[7.11]}. Steel fiber reinforced concrete beam-column joints analyzed through advanced FEM show less than 5\% average error under cyclic loading, with optimal 2\% steel fiber volume fractions delivering 15\% increased load capacity and 25\% delayed crack formation\href{https://www.nature.com/articles/s41598-024-69270-1}{[7.12]}\href{https://www.nature.com/articles/s41598-024-69270-1}{[7.13]}. Comparative studies between 1D and 2D approaches reveal nuanced trade-offs. Higher-order beam theories maintain computational efficiency while addressing limitations of classical Euler-Bernoulli and Timoshenko approaches for thin-walled structures\href{https://www.sciencedirect.com/science/article/pii/S2352012420303854}{[7.13]}. Beam element models excel for slender structures and global response analysis, while 2D/3D elements become essential for local stress concentrations and complex geometries, \href{https://en.wikipedia.org/wiki/Euler%E2%80%93Bernoulli_beam_theory}{[7.14]} with hybrid approaches emerging as optimal strategies for balancing accuracy and computational cost.
+
+The integration of deep learning architectures with structural engineering has produced transformative advances across multiple fronts\href{https://doi.org/10.3390/s20102778}{[8]}, with conditional autoencoders achieving 35\% improvement in minor damage detection accuracy through mechanics-informed approaches\href{https://arxiv.org/html/2402.15492v1}{[8.5]}.The breakthrough MIDAS (Mechanics-Informed Damage Assessment of Structures) framework introduced by Li et al. in 2024 integrates mechanical characteristics directly into neural network architectures through pairwise mechanical loss terms, enabling real-time adaptation with only three hours of training data. \href{https://doi.org/10.1038/s41467-024-52501-4}{[9]} This represents a fundamental shift from traditional data-driven approaches toward physics-aware machine learning systems that respect underlying structural mechanics principles. 
+U-Net architectures have demonstrated exceptional performance in structural field prediction and discrepancy learning applications, particularly when enhanced with attention mechanisms and skip connections\href{https://link.springer.com/chapter/10.1007/978-3-319-24574-4_28}{[9.5]}\href{https://www.semanticscholar.org/paper/Attention-U-Net:-Learning-Where-to-Look-for-the-Oktay-Schlemper/ae1c89817a3a239e5344293138bdd80293983460}{[9.6]}\href{https://www.sciencedirect.com/science/article/pii/S0955598622001753}{[9.7]}. Recent research shows these architectures excel at multi-scale feature extraction through encoder-decoder frameworks while preserving spatial information crucial for structural applications. Microstructure-embedded autoencoder approaches using U-Net-like architectures achieve superior performance over standard methods by reconstructing high-resolution solution fields from reduced parametric spaces\href{https://doi.org/10.1007/s00466-024-02568-z}{[10]}, directly addressing the multi-fidelity integration challenge central to this research domain. 
+XGBoost integration in surrogate modeling has proven particularly effective for structural parameter mapping, with Bayesian-optimized XGBoost models achieving 8x faster hyperparameter optimization compared to traditional methods while maintaining superior performance.\href{https://doi.org/10.1016/j.engstruct.2023.117307}{[11]} The algorithm's ability to handle feature interactions and collinearity makes it especially suitable for the parameter mapping stage in multi-fidelity frameworks, where complex relationships between low-fidelity model parameters and high-fidelity discrepancies must be captured efficiently.\href{https://www.researchgate.net/figure/The-performance-of-XGBoost-surrogate-models-in-the-training-and-testing-for-predicting_fig5_372412960}{[12]}
+
+Multi-fidelity modeling has matured from theoretical concept to practical engineering tool, with documented applications showing orders of magnitude improvements in computational efficiency while maintaining engineering accuracy requirements \href{https://doi.org/10.3934/acse.2023015}{[11]} Recent research demonstrates 6000x speedup \href{https://doi.org/10.1007/s00366-020-01084-x}{[13]} in boundary element method applications while maintaining accuracy within 2\% of high-fidelity models\href{https://doi.org/10.1016/j.enganabound.2019.03.036}{[14]}, and 10⁶ to 10⁷ times more efficient execution \href{https://doi.org/10.1103/PhysRevAccelBeams.23.044601}{[15]}  for complex optimization problems\href{https://doi.org/10.1016/j.engstruct.2023.117307}{[11]}. These achievements stem from sophisticated integration strategies that combine additive and multiplicative correction methods, hierarchical modeling approaches, and advanced discrepancy learning techniques.
+The most significant breakthrough lies in correction surface methods that provide 2,225 times more accurate probability of failure estimates\href{https://doi.org/10.1007/s00366-020-01084-x}{[13]} compared to single-fidelity approaches in composite structure reliability analysis.\href{https://doi.org/10.1016/j.enganabound.2019.03.036}{[14]} This dramatic improvement results from sophisticated discrepancy learning methodologies that capture complex mappings between fidelity levels through ensemble-based approaches using multiple deep neural networks with Bayesian optimization. The integration of online transfer learning methods enables real-time model updates, addressing the critical need for adaptive systems in operational environments.\href{https://doi.org/10.1016/j.aei.2022.101689}{[16]}\href{http://dx.doi.org/10.3390/ecsa-9-13344}{[17]}
+
+Current limitations center on training complexity and data requirements, particularly for physics-informed neural networks that remain challenging to design and train due to convergence issues and non-convex optimization landscapes.\href{https://doi.org/10.1016/j.jcp.2020.109942}{[18]}\href{https://doi.org/10.1007/s10915-022-01939-z}{[19]} High-fidelity data scarcity continues to limit model accuracy for complex nonlinear systems,\href{https://doi.org/10.1002/prep.202400248}{[20]}  while generalization across different structural types and loading conditions remains problematic.\href{http://dx.doi.org/10.2139/ssrn.4332506}{[21]}\href{http://dx.doi.org/10.3390/ecsa-9-13344}{[22]} These limitations directly impact the feasibility of applying multi-fidelity approaches to novel structural configurations like homogeneous beams with rectangular notch geometries.
+
+Wave-based structural health monitoring (SHM) has matured significantly, leveraging guided waves in the 20 kHz–1 MHz range, with optimal performance typically between 100–300 kHz\href{https://royalsocietypublishing.org/doi/abs/10.1098/rspa.2007.0048}{[23]}. Hanning-windowed 5-cycle sine bursts at 100 kHz are widely used for efficient large-area monitoring\href{https://www.sciencedirect.com/science/article/pii/S0020740322004921}{[24]}. Recent multi-frequency strategies (60–180 kHz) have improved damage detection, achieving up to 94\% crack localization and 93\% damage quantification accuracy.
+However, real-time implementation remains limited by computational bottlenecks. Full-field wave simulations are time-consuming and memory-intensive, forcing trade-offs between model accuracy and speed. Real-time systems are typically restricted to basic damage detection, with complex analysis deferred to offline processing.
+Advances such as physics-guided neural networks and optimized baseline selection have improved signal processing, but environmental effects like temperature variation still complicate damage detection and increase computational demands. Long-term monitoring also generates massive datasets—up to 9 TB over 4.5 years—posing challenges for storage and wireless data transmission\href{https://pmc.ncbi.nlm.nih.gov/articles/PMC12162875/}{[25]}\href{https://www.researchgate.net/publication/359193759_Temperature_variation_compensated_damage_classification_and_localisation_in_ultrasonic_guided_wave_SHM_using_self-learnt_features_and_Gaussian_mixture_models}{[26]}.
+Multi-fidelity modeling offers a promising solution, combining high-fidelity simulations with surrogate and reduced-order models. Recent work shows 3–10× speedups and a 54\% reduction in high-fidelity data needs via transfer learning, making real-time probabilistic damage assessment more feasible.
+
+The inverse problem paradigm represents the fundamental mathematical framework underlying damage detection and structural parameter identification in modern SHM systems. Structural damage detection constitutes an inherently inverse problem where uncertain parameters of computational models must be identified from measured vibration or wave propagation data\href{https://royalsocietypublishing.org/doi/10.1098/rsta.2006.1930}{[27]}. Recent comprehensive reviews spanning 2023-2025 literature have identified 890 publications on computer vision-based damage detection methods\href{https://link.springer.com/article/10.1007/s11831-025-10279-8}{[28]} and 337 articles on deep learning approaches for SHM\href{https://pmc.ncbi.nlm.nih.gov/articles/PMC10650096/}{[29]}, demonstrating unprecedented growth in inverse problem methodologies. The fundamental challenge lies in transforming observed structural responses into accurate estimates of damage parameters—a mathematically ill-posed problem requiring sophisticated regularization and probabilistic frameworks to ensure solution stability and uniqueness\href{https://royalsocietypublishing.org/doi/10.1098/rspa.2021.0526}{[30]}.
+
+Bayesian optimization frameworks have emerged as the dominant paradigm for inverse structural analysis, with recent advances enabling transformation of uncertainty-driven inverse problems into tractable forward formulations through hierarchical probabilistic modeling\href{https://www.researchgate.net/publication/380208708_Optimization_of_structural_damage_identification_method_based_on_finite_element_method_and_Bayesian_updating}{[31]}. Sparse Bayesian learning methodologies achieve accurate identification of spatially localized damage through mixture-of-Gaussians formulations that explicitly capture damage sparsity characteristics\href{https://www.sciencedirect.com/science/article/abs/pii/S0888327020300753}{[32]}, while hierarchical Bayesian approaches with sensitivity analysis systematically quantify prior knowledge and update probabilistic distributions as new measurement data become available\href{https://onlinelibrary.wiley.com/doi/10.1155/2024/4204316}{[33]}. These probabilistic frameworks address both globally identifiable inverse problems and locally identifiable scenarios with multiple feasible solutions, providing comprehensive uncertainty quantification essential for safety-critical infrastructure applications. Recent implementations demonstrate superior performance over deterministic approaches, particularly for problems involving incomplete measurements and environmental variability\href{https://link.springer.com/article/10.1007/s13349-025-00944-8}{[34]}.
+
+Differential evolution (DE) optimization has proven exceptionally effective for structural inverse problems, demonstrating robustness to multi-modal objective functions and high-dimensional nonlinear parameter spaces characteristic of damage identification scenarios. A 2024 multi-hybrid differential evolution algorithm incorporating adaptive parameters, enhanced mutation-crossover operators, and Gaussian random sampling achieved superior convergence for frame structure optimization\href{https://www.nature.com/articles/s41598-024-54384-3}{[35]}, while comparative studies of DE variants including composite DE, adaptive DE with external archive (JADE), and self-adaptive DE (SADE) established performance benchmarks for constrained structural problems\href{https://www.frontiersin.org/journals/built-environment/articles/10.3389/fbuil.2020.00102/full}{[36]}. The algorithm's efficacy for inverse problems stems from its population-based global search strategy that maintains diversity through differential mutation, preventing premature convergence to local optima—a critical advantage for the highly nonlinear objective landscapes encountered in damage parameter identification\href{https://link.springer.com/chapter/10.1007/978-3-031-77432-4_9}{[37]}. Hybrid variants combining DE with particle swarm optimization demonstrate 23.83\% higher accuracy than genetic algorithms for structural parameter prediction from incomplete displacement information\href{https://link.springer.com/article/10.1007/s11709-024-1078-y}{[38]}.
+
+Surrogate model integration as computationally efficient forward solvers within inverse analysis frameworks represents the most significant recent advancement for real-time parameter identification. AI-driven differentiable optimization frameworks employing deep learning-based surrogate models achieve full-chain inverse analysis in one-tenth the time of traditional finite element model updating (FEMU) methods, with deployment enabling parameter estimation within seconds\href{https://www.sciencedirect.com/science/article/abs/pii/S088832702500319X?dgcid=rss_sd_all}{[39]}. These frameworks achieve 83.0\% accuracy in damage parameter estimation in single iterations, improving to 88.2\% through iterative updates, while maintaining computational efficiency improvements exceeding 100-fold compared to direct FEM-based optimization\href{https://www.nature.com/articles/s41598-023-46141-9}{[40]}. Physics-informed neural networks (PINNs) serve quadruple roles as pure PDE solvers, data-enhanced forward models, inverse solvers for parameter identification, and fast-to-evaluate surrogate models\href{https://amses-journal.springeropen.com/articles/10.1186/s40323-024-00265-3}{[41]}, while data-guided PINNs introduced in 2024 employ two-phase training strategies—pre-training on data loss followed by fine-tuning on composite physics-informed loss—enabling convergence with significantly fewer iterations\href{https://arxiv.org/abs/2407.10836}{[42]}.
+
+Notch and crack parameter identification from ultrasonic guided wave measurements exemplifies the practical application of surrogate-assisted inverse methodologies. Recent research demonstrates two-stage fast Bayesian inference schemes incorporating Kriging surrogate predictors to accelerate likelihood evaluations during Transitional Markov Chain Monte Carlo sampling, with systematic uncertainty propagation from physical rail model parameters through crack identification processes\href{https://www.sciencedirect.com/science/article/pii/S0022460X2400676X}{[43]}. Deep learning-assisted approaches employing convolutional neural network architectures achieve automatic assessment of delamination locations and sizes in multilayer structures from wave scattering patterns\href{https://www.sciencedirect.com/science/article/abs/pii/S0041624X24001136}{[44]}, while densely connected convolutional networks enable three-dimensional fatigue crack quantification with millimeter-scale spatial resolution\href{https://www.sciencedirect.com/science/article/abs/pii/S0142112323005959}{[45]}. Explainable deep learning frameworks provide interpretable mapping between guided wave features and pipe crack characteristics, addressing the critical need for physically meaningful parameter identification in safety-critical applications\href{https://www.sciencedirect.com/science/article/abs/pii/S0263224122014737}{[46]}.
+
+Multi-fidelity surrogate model strategies specifically designed for inverse problems demonstrate remarkable data efficiency advantages through strategic integration of low-cost approximate models with limited high-fidelity data. Multi-fidelity Bayesian optimization frameworks employ hierarchical sampling strategies—typically 6d points at lowest fidelity with halving for each subsequent level (d = input dimension)—using Latin hypercube sampling for optimal space-filling initialization\href{https://royalsocietypublishing.org/doi/10.1098/rsif.2015.1107}{[47]}. Recent applications to haemodynamic parameter estimation demonstrate successful model inversion with drastically reduced high-fidelity evaluations, while evolutionary algorithms incorporating both surrogate and inverse surrogate models address the excessive randomness in solution generation that limits conventional surrogate-assisted evolutionary approaches\href{https://www.ieee-jas.net/en/article/doi/10.1109/JAS.2025.125111}{[48]}. Strategic population initialization informed by training data distributions represents a critical yet under-explored aspect, with emerging research demonstrating that confined search spaces derived from high-confidence parameter regions significantly accelerate convergence while maintaining exploration capabilities in extended domains\href{https://link.springer.com/article/10.1007/s00170-021-07642-x}{[49]}.
+
+The convergence of multi-fidelity surrogate modeling with evolutionary optimization for inverse problems addresses the fundamental computational bottleneck in structural diagnosis—expensive forward model evaluations. This integration enables transformation of computationally prohibitive inverse analyses into tractable real-time parameter identification systems essential for autonomous structural health monitoring and predictive maintenance of next-generation infrastructure.
+
+\section{Research Objectives}
+
+The primary objectives of this research encompass the development and validation of a comprehensive multi-fidelity surrogate modeling framework for structural response prediction in notched beam configurations. The research methodology systematically addresses computational efficiency challenges in structural analysis through innovative integration of theoretical beam models with advanced machine learning architectures.
+
+\bigskip
+
+\textbf{Objective 1: Development of Comparative Beam Modeling Frameworks}
+
+\medskip
+
+\textbf{1a. One-Dimensional Zigzag Beam Theory Implementation:} Development of a comprehensive one-dimensional zigzag beam theory framework specifically adapted for homogeneous beam structures with rectangular notch configurations. This objective involves the systematic extension of zigzag theory, originally formulated for laminated composite structures, to homogeneous material applications. The implementation incorporates layer-wise displacement field representations that eliminate shear correction factors while maintaining computational efficiency through reduced degrees of freedom. The zigzag theory formulation captures complex deformation patterns through innovative displacement field representations, enabling accurate prediction of structural responses with significantly reduced computational overhead compared to traditional finite element approaches. The theoretical framework accounts for geometric discontinuities introduced by rectangular notches, requiring specialized treatment of boundary conditions and stress concentration effects within the zigzag displacement field formulation.
+
+\medskip
+
+\textbf{1b. Two-Dimensional Elastic Beam Finite Element Analysis:} Establishment of a validated two-dimensional finite element modeling framework for elastic beam structures incorporating rectangular notch geometries. This comprehensive finite element implementation serves as the high-fidelity reference solution for comparative analysis and validation purposes. The two-dimensional model employs advanced element formulations capable of accurately capturing stress concentrations, geometric discontinuities, and complex deformation patterns in the vicinity of notch regions. The finite element framework incorporates proper mesh refinement strategies, convergence analysis protocols, and boundary condition implementations to ensure numerical accuracy and solution reliability. This high-fidelity modeling approach provides the reference dataset for training and validation of subsequent surrogate modeling architectures.
+
+\bigskip
+
+\textbf{Objective 2: Development of Surrogate Models using Machine Learning Architectures}
+
+\medskip
+
+\textbf{2a: Low-Fidelity Surrogate Model Development}
+
+\medskip
+
+Development of a comprehensive Low-Fidelity Surrogate Model utilizing advanced machine learning architectures to efficiently predict structural responses based on one-dimensional zigzag theory implementations. The LFSM framework employs a dual-architecture approach combining Conditional Autoencoder networks with XGBoost regression algorithms to capture complex nonlinear relationships between geometric parameters, material properties, and structural responses. The Conditional Autoencoder component provides dimensionality reduction and feature extraction capabilities for high-dimensional response data, while the XGBoost algorithm enables robust parameter-to-latent space mapping with exceptional generalization performance. The LFSM training dataset comprises approximately 650 carefully selected one-dimensional response samples spanning diverse geometric configurations and  material properties, relevant to rectangular notched beam structures. The model architecture incorporates parameter conditioning mechanisms that enable physics-informed learning, ensuring consistency with underlying structural mechanics principles while maintaining computational efficiency suitable for real-time applications.
+
+\bigskip
+
+\textbf{2b: Multi-Fidelity Surrogate Model with U-NET Discrepancy Learning}
+
+\medskip
+
+Development of an innovative Multi-Fidelity Surrogate Modeling (MFSM) framework that combines low-fidelity structural predictions with advanced discrepancy learning through a customized U-NET architecture. The framework follows a two-stage process, where low-fidelity models generate initial response predictions that are subsequently refined by a specialized discrepancy learning module.
+
+The proposed U-NET features architectural innovations beyond the standard encoder–decoder design, including parameter-aware feature projection, residual learning, and attention mechanisms. Structural parameters such as geometry and material properties are systematically incorporated into the network at multiple levels, enabling adaptive learning of complex parameter–response relationships.
+
+The model ensures accurate transformation of low-fidelity predictions into high-fidelity approximations by leveraging multi-scale feature extraction, adaptive reconstruction, and loss functions designed to balance magnitude accuracy with temporal and spatial consistency. This approach provides a robust framework for enhancing structural response prediction across varying fidelity levels.
+
+\bigskip
+
+\textbf{2c: High-Fidelity Surrogate Model Development and Comprehensive Performance Comparison}
+
+\medskip
+
+Development of a direct High-Fidelity Surrogate Model trained exclusively on two-dimensional finite element responses to establish baseline performance metrics for comparative analysis. The HFSM utilizes the same approximately 60 high-fidelity response samples employed in the MFSM discrepancy learning module, providing direct parameter-to-response mapping without intermediate low-fidelity predictions. This approach serves as a critical benchmark for evaluating the effectiveness of the multi-fidelity strategy compared to direct high-fidelity modeling approaches. The comprehensive performance comparison encompasses systematic evaluation of predictive accuracy, computational efficiency, and generalization capabilities across all developed modeling frameworks. The comparative analysis quantifies the relative advantages and limitations of each modeling approach, establishing clear guidelines for optimal method selection based on specific application requirements. Furthermore, the comparison investigates the training data efficiency of each approach, evaluating how effectively each method utilizes available high-fidelity data to achieve optimal predictive performance.
+
+\bigskip
+
+\textbf{Objective 3: Inverse Problem Solution for Notch Parameter Identification}
+
+\medskip
+
+Development of an inverse problem solution framework employing the Multi-Fidelity Surrogate Model as a computationally efficient forward solver to determine unknown notch parameters—location, depth, and width—from measured displacement responses. The methodology integrates differential evolution optimization with strategic three-tier population initialization: fifteen individuals within high-confidence regions identified from training data analysis, ten at periphery boundaries, and five in extended parameter spaces beyond training bounds. This strategy balances exploitation of empirically validated parameter regions with exploration capabilities essential for global optimization. The MFSM's millisecond-scale inference enables extensive parameter space exploration, addressing the computational bottleneck of traditional inverse analysis requiring expensive finite element evaluations. Performance validation employs synthetic measurements with known ground-truth parameters to assess parameter recovery accuracy, convergence characteristics, and noise robustness, demonstrating practical deployment potential for real-time structural damage identification.
+
+
+
+% Chapter 2: Theoretical Foundation
+\chapter{Theoretical Foundation and Concepts}
+\label{chap:foundation}
+
+\section{1D Beam Zigzag Theory}
+\label{sec:zigzag_theory}
+The zigzag theory for laminated composite beams represents a sophisticated refinement of classical beam theories that addresses the inherent limitations of traditional approaches when dealing with layered structures. Unlike classical theories that assume linear displacement variation through the beam thickness, zigzag theory incorporates the material discontinuities between layers by allowing piecewise-linear displacement patterns that capture the sudden changes in material properties at layer interfaces.
+
+Consider a laminated composite beam of total height $h$ consisting of $N$ perfectly bonded layers, where each layer $k$ extends from coordinate $z_{k-1}$ to $z_k$ measured from a reference plane. The beam extends along the longitudinal $x$-direction with length $L$, while the $z$-direction represents the through-thickness coordinate. The fundamental assumption underlying zigzag theory is that the axial displacement exhibits a layerwise linear variation that accounts for the transverse shear deformation effects neglected in classical beam theories.
+
+The theory assumes that each layer behaves as a linear elastic material with distinct material properties, creating interfaces where material properties change discontinuously. These material discontinuities generate interlaminar shear stress concentrations that classical theories cannot accurately predict. The zigzag approach addresses this limitation by introducing a zigzag function that captures the layer-dependent linear variation of axial displacement while maintaining displacement continuity across layer interfaces.
+
+For the specific case of three-layer composite beams under consideration, the layers are designated as bottom ($k=1$), middle ($k=2$), and top ($k=3$), with interfaces located at $z_1$ and $z_2$. Each layer possesses distinct elastic moduli $E^{(k)}$, shear moduli $G^{(k)}$, and densities $\rho^{(k)}$, while maintaining perfect bonding at all interfaces.
+
+The displacement field in zigzag theory is expressed through three primary kinematic variables that represent the global beam behavior, enhanced by a zigzag function that captures local layer effects. The axial displacement $u(x,z,t)$ is formulated as:
+
+\begin{equation}
+    u(x,z,t) = u_0(x,t) - z \frac{\partial w_0}{\partial x}(x,t) + R^{(k)}(z) \, \psi_0(x,t)
+\end{equation}
+
+
+where \(u_0(x,t)\) represents the axial displacement of the reference plane located at \(z = 0\), \(w_0(x,t)\) denotes the transverse displacement, and \(\psi_0(x,t)\) is the shear deformation parameter related to the average shear strain of the reference plane. The term \(- z \frac{\partial w_0}{\partial x}\)
+
+represents the classical Euler--Bernoulli contribution, while $R^{(k)}(z)$ is the layer-dependent zigzag function.
+
+The transverse displacement is assumed to remain constant across the beam thickness, consistent with the assumption of inextensible normals:
+\begin{equation}
+   w(x,z,t) = w_0(x,t) 
+\end{equation}
+
+
+This assumption is valid for slender beams where the length-to-thickness ratio is sufficiently large, typically greater than $10$. For the analysis of ultrasonic wave propagation in composite beams, this assumption remains appropriate given the high frequency content and the associated short wavelengths relative to beam thickness.
+
+The displacement field can be expressed in compact matrix form as:
+
+\begin{equation}
+\mathbf{u}(x,z,t) = 
+\begin{Bmatrix}
+u(x,z,t) \\
+w(x,z,t)
+\end{Bmatrix}
+=
+\begin{bmatrix}
+1 & -z\frac{\partial }{\partial x} & R^{(k)}(z) \\
+0 & 1 & 0
+\end{bmatrix}
+\begin{Bmatrix}
+u_0(x,t) \\
+w_0(x,t) \\
+\psi_0(x,t)
+\end{Bmatrix}
+\end{equation}
+
+
+This formulation reduces the infinite degrees of freedom associated with the continuum displacement field to three generalized displacement variables, enabling efficient computational implementation while maintaining the essential physics of layered beam behavior.
+
+The strain components relevant to beam theory are the axial strain $\varepsilon_x$ and the transverse shear strain $\gamma_{xz}$. These strains are derived from the displacement field through standard kinematic relations.
+
+The axial strain is obtained as:
+\begin{equation}
+\varepsilon_x = \frac{\partial u}{\partial x} 
+= \frac{\partial u_0}{\partial x} 
+- z \frac{\partial^2 w_0}{\partial x^2} 
++ R^{(k)}(z) \frac{\partial \psi_0}{\partial x}
+\end{equation}
+
+This expression reveals the three distinct contributions to axial strain: the membrane strain 
+$\frac{\partial u_0}{\partial x}$, the bending strain 
+$- z \frac{\partial^2 w_0}{\partial x^2}$, and the zigzag contribution 
+$R^{(k)}(z) \frac{\partial \psi_0}{\partial x}$ that captures the layer-wise linear variation.
+
+The transverse shear strain is formulated as:
+\begin{equation}
+\gamma_{xz} = \frac{\partial u}{\partial z} + \frac{\partial w}{\partial x} 
+= \frac{\partial R^{(k)}}{\partial z} \, \psi_0 
+\end{equation}
+
+Since the transverse displacement is independent of $z$, the shear strain depends only on the derivative of the zigzag function. The term 
+$\frac{\partial R^{(k)}}{\partial z}$ represents the layer-wise constant shear strain within each layer, while maintaining the necessary discontinuities at layer interfaces to accommodate different material properties.
+
+The strain field can be expressed in matrix notation as:
+\begin{equation}
+\begin{Bmatrix} \varepsilon_x \\ \gamma_{xz} \end{Bmatrix} =
+\begin{bmatrix} 
+\frac{\partial}{\partial x} & -z \frac{\partial^2}{\partial x^2} & R^{(k)}(z) \frac{\partial}{\partial x} \\
+0 & 0 & \frac{\partial R^{(k)}}{\partial z} 
+\end{bmatrix}
+\begin{Bmatrix} u_0 \\ w_0 \\ \psi_0 \end{Bmatrix}
+\end{equation}
+
+
+The zigzag function $R^{(k)}(z)$ must satisfy several critical conditions to ensure physical consistency and mathematical well-posedness. These conditions include displacement continuity at layer interfaces, stress continuity requirements, and appropriate boundary conditions at the beam's top and bottom surfaces.
+
+For a three-layer beam, the zigzag function is constructed as a piecewise cubic polynomial within each layer:
+\begin{equation}
+R^{(k)}(z) = a_0^{(k)} + a_1^{(k)} z + a_2^{(k)} z^2 + a_3^{(k)} z^3
+\end{equation}
+
+where the coefficients $a_0^{(k)}$, $a_1^{(k)}$, $a_2^{(k)}$, and $a_3^{(k)}$ are determined through the enforcement of continuity and boundary conditions.
+
+The fundamental continuity conditions require that the axial displacement remains continuous across layer interfaces. At the interface between layers $k$ and $k+1$ located at $z = z_k$, this condition yields:
+\begin{equation}
+R^{(k)}(z_k) = R^{(k+1)}(z_k)
+\end{equation}
+
+Additionally, the transverse shear stress must remain continuous across interfaces to maintain equilibrium. This condition is expressed as:
+\begin{equation}
+G^{(k)} \gamma_{xz}^{(k)} = G^{(k+1)} \gamma_{xz}^{(k+1)} \quad \text{at} \quad z = z_k
+\end{equation}
+
+Substituting the shear strain expression, this becomes:
+\begin{equation}
+G^{(k)} \frac{\partial R^{(k)}}{\partial z}\bigg|_{z=z_k} = 
+G^{(k+1)} \frac{\partial R^{(k+1)}}{\partial z}\bigg|_{z=z_k}
+\end{equation}
+
+The boundary conditions at the top and bottom surfaces require that the transverse shear stress vanishes for a free surface:
+\begin{equation}
+\gamma_{xz}^{(1)}\bigg|_{z=z_0} = \frac{\partial R^{(1)}}{\partial z}\bigg|_{z=z_0} \, \psi_0 = 0
+\end{equation}
+
+\begin{equation}
+\gamma_{xz}^{(N)}\bigg|_{z=z_N} = \frac{\partial R^{(N)}}{\partial z}\bigg|_{z=z_N} \, \psi_0 = 0
+\end{equation}
+
+The determination of the zigzag function coefficients requires establishing a system of twelve equations to uniquely define the twelve unknown coefficients. This system incorporates displacement continuity conditions at layer interfaces, shear stress continuity requirements, boundary conditions at free surfaces, and appropriate normalization constraints.
+The systematic solution of this constraint system yields the explicit expressions for the zigzag function coefficients in each layer. These coefficients define the piecewise cubic polynomials that capture the layer-wise linear variation of axial displacement while maintaining all necessary continuity and equilibrium requirements. The resulting zigzag functions completely characterize the enhanced displacement field and enable accurate representation of the through-thickness shear deformation behavior in laminated composite beams.
+
+
+
+\subsection{Constitutive Relations for Composite Layers}
+
+The constitutive relations for each layer relate the stress components to the strain components through the material properties. For each layer $k$, assuming isotropic material behavior within the layer, the stress-strain relations are:
+
+\begin{align}
+\sigma_x^{(k)} &= E^{(k)} \, \varepsilon_x^{(k)} \\
+\tau_{xz}^{(k)} &= G^{(k)} \, \gamma_{xz}^{(k)}
+\end{align}
+
+
+
+where $E^{(k)}$ and $G^{(k)}$ are the elastic and shear moduli of layer $k$, respectively. For isotropic materials, the shear modulus is related to the elastic modulus through:
+
+\begin{equation}
+G^{(k)} = \frac{E^{(k)}}{2 \left( 1 + \nu^{(k)} \right)}
+\end{equation}
+
+
+where $\nu^{(k)}$ is Poisson's ratio for layer $k$.
+
+Substituting the strain expressions into the constitutive relations yields:
+
+\begin{equation}
+\sigma_x^{(k)} = E^{(k)} \left[ 
+\frac{\partial u_0}{\partial x} 
+- z \frac{\partial^2 w_0}{\partial x^2} 
++ R^{(k)}(z) \frac{\partial \psi_0}{\partial x} 
+\right]
+\end{equation}
+
+
+\begin{equation}
+\tau_{xz}^{(k)} = G^{(k)} \left[ 
+\frac{\partial R^{(k)}}{\partial z} \, \psi_0 
+\right]
+\end{equation}
+
+
+These expressions reveal how the zigzag theory naturally captures the layer-wise variation of stresses while maintaining the necessary continuity conditions at interfaces.
+
+\subsection{Variational formulation and governing equations}
+\label{sec:variational}
+
+
+The governing equations for the zigzag beam theory are derived using Hamilton's principle, which states that the motion of a dynamic system between two specified times makes the action integral stationary. For conservative systems, Hamilton's principle is formulated as:
+
+\begin{equation}
+\delta \int_{t_1}^{t_2} L \, dt = 0
+\end{equation}
+
+where the Lagrangian is given by
+\begin{equation}
+L = T - U
+\end{equation}
+representing the difference between the kinetic energy $T$ and the strain energy $U$. The variational operator $\delta$ denotes the first variation of the action integral with respect to the generalized coordinates.
+
+\subsection*{Kinetic Energy Formulation}
+
+The kinetic energy for a three-layer zigzag beam of length $L$ and width $b$ is expressed as:
+
+\begin{equation}
+T = \frac{1}{2} \int_0^L \int_{z_0}^{z_3} \rho^{(k)} 
+\left[ \left(\frac{\partial u}{\partial t}\right)^2 
+     + \left(\frac{\partial w}{\partial t}\right)^2 \right] 
+\, b \, dz \, dx
+\end{equation}
+
+where $\rho^{(k)}$ denotes the density of layer $k$.  
+Substituting the zigzag displacement field expressions:
+
+\begin{align}
+u(x,z,t) &= u_0(x,t) - z \frac{\partial w_0}{\partial x}(x,t) 
+           + R^{(k)}(z) \, \psi_0(x,t) \\[6pt]
+w(x,z,t) &= w_0(x,t)
+\end{align}
+
+and performing the through-thickness integration yields:
+
+\begin{align}
+T = \frac{1}{2} \int_0^L \Big[ & I_{00}\dot{u}_0^2 + I_{00}\dot{w}_0^2 
++ I_{11}\left(\frac{\partial \dot{w}_0}{\partial x}\right)^2 + I_{22}\dot{\psi}_0^2 \nonumber \\
+& - 2I_{01}\dot{u}_0\frac{\partial \dot{w}_0}{\partial x} 
++ 2I_{02}\dot{u}_0\dot{\psi}_0 
+- 2I_{12}\frac{\partial \dot{w}_0}{\partial x}\dot{\psi}_0 \Big] dx
+\end{align}
+
+
+The inertia coefficients are defined through layerwise integration:
+
+\begin{align}
+I_{00} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} dz 
+       = \sum_{k=1}^{3} \rho^{(k)} b \, h^{(k)} \\[6pt]
+I_{01} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} z \, dz \\[6pt]
+I_{02} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} R^{(k)}(z) \, dz \\[6pt]
+I_{11} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} z^2 \, dz \\[6pt]
+I_{12} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} z \, R^{(k)}(z) \, dz \\[6pt]
+I_{22} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} \left[ R^{(k)}(z) \right]^2 dz
+\end{align}
+where 
+\begin{equation}
+h^{(k)} = z_k - z_{k-1}
+\end{equation}
+represents the thickness of layer $k$.
+
+\subsection*{Strain Energy Formulation}
+
+The strain energy is expressed in terms of the stress and strain components:
+
+\begin{equation}
+U = \frac{1}{2} \int_0^L \int_{z_0}^{z_3} 
+\left( \sigma_x^{(k)} \, \varepsilon_x^{(k)} 
+     + \tau_{xz}^{(k)} \, \gamma_{xz}^{(k)} \right) 
+b \, dz \, dx
+\end{equation}
+
+Substituting the constitutive relations and strain expressions, and performing the through-thickness integration yields:
+
+\begin{align}
+U = \frac{1}{2} \int_0^L &\Bigg[ 
+A_{11} \left(\frac{\partial u_0}{\partial x}\right)^2 
++ A_{22} \left(\frac{\partial^2 w_0}{\partial x^2}\right)^2 
++ A_{33} \left(\frac{\partial \psi_0}{\partial x}\right)^2 
++ A_{44} \, \psi_0^2 \nonumber \\[6pt]
+&- 2A_{12} \frac{\partial u_0}{\partial x} \frac{\partial^2 w_0}{\partial x^2} 
++ 2A_{13} \frac{\partial u_0}{\partial x} \frac{\partial \psi_0}{\partial x} 
+- 2A_{23} \frac{\partial^2 w_0}{\partial x^2} \frac{\partial \psi_0}{\partial x}
+\Bigg] dx
+\end{align}
+
+The stiffness coefficients are defined as:
+
+\begin{align}
+A_{11} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} dz \\[6pt]
+A_{12} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} z \, dz \\[6pt]
+A_{13} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} R^{(k)}(z) \, dz \\[6pt]
+A_{22} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} z^2 \, dz \\[6pt]
+A_{23} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} z \, R^{(k)}(z) \, dz \\[6pt]
+A_{33} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} \left[R^{(k)}(z)\right]^2 dz \\[6pt]
+A_{44} &= \sum_{k=1}^{3} G^{(k)} b \int_{z_{k-1}}^{z_k} \left[ \frac{\partial R^{(k)}}{\partial z} \right]^2 dz
+\end{align}
+
+
+\subsection*{Derivation of Governing Equations}
+
+Application of Hamilton's principle to the Lagrangian $L = T - U$ requires:
+
+\begin{equation}
+\delta \int_{t_1}^{t_2} (T - U) \, dt = 0
+\end{equation}
+
+Taking variations with respect to each generalized coordinate and applying integration by parts yields the three coupled governing equations:
+
+\paragraph{Axial Force Equilibrium:}
+\begin{equation}
+\frac{\partial N}{\partial x} 
+= I_{11} \frac{\partial^2 u_0}{\partial t^2} 
+- I_{12} \frac{\partial^2}{\partial x \, \partial t^2} w_0 
++ I_{13} \frac{\partial^2 \psi_0}{\partial t^2}
+\end{equation}
+
+\paragraph{Transverse Force and Moment Equilibrium:}
+\begin{equation}
+\frac{\partial^2 M}{\partial x^2} + \frac{\partial V_x}{\partial x} 
+= -I_{12} \frac{\partial^2}{\partial x \, \partial t^2} u_0 
++ I_{22} \frac{\partial^2}{\partial x^2 \partial t^2} w_0 
+- I_{23} \frac{\partial^2}{\partial x \, \partial t^2} \psi_0
+\end{equation}
+
+\paragraph{Zigzag Shear Equilibrium:}
+\begin{equation}
+\frac{\partial P}{\partial x} - V_x 
+= I_{13} \frac{\partial^2 u_0}{\partial t^2} 
+- I_{23} \frac{\partial^2}{\partial x \, \partial t^2} w_0 
++ I_{33} \frac{\partial^2 \psi_0}{\partial t^2}
+\end{equation}
+
+\subsection*{Stress Resultant Definitions}
+
+The stress resultants are defined through through-thickness integration of stresses:
+
+\paragraph{Axial Force Resultant:}
+\begin{align}
+N &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \sigma_x^{(k)} b \, dz \nonumber \\
+  &= A_{11} \frac{\partial u_0}{\partial x} 
+   - A_{12} \frac{\partial^2 w_0}{\partial x^2} 
+   + A_{13} \frac{\partial \psi_0}{\partial x}
+\end{align}
+
+\paragraph{Bending Moment Resultant:}
+\begin{align}
+M &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \sigma_x^{(k)} z \, b \, dz \nonumber \\
+  &= A_{12} \frac{\partial u_0}{\partial x} 
+   - A_{22} \frac{\partial^2 w_0}{\partial x^2} 
+   + A_{23} \frac{\partial \psi_0}{\partial x}
+\end{align}
+
+\paragraph{Zigzag Stress Resultant:}
+\begin{align}
+P &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \sigma_x^{(k)} R^{(k)}(z) b \, dz \nonumber \\
+  &= A_{13} \frac{\partial u_0}{\partial x} 
+   - A_{23} \frac{\partial^2 w_0}{\partial x^2} 
+   + A_{33} \frac{\partial \psi_0}{\partial x}
+\end{align}
+
+\paragraph{Transverse Shear Force Resultant:}
+\begin{align}
+V_x &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \tau_{xz}^{(k)} b \, dz \nonumber \\
+    &= B_{1} \frac{\partial w_0}{\partial x} + B_{2} \, \psi_0
+\end{align}
+where $B_{1} = \langle Q_{55} \rangle$ and $B_{2} = \langle Q_{55} \, R^{(k)}_{,z} \rangle$ are effective shear coefficients obtained from through-thickness integration.
+
+\subsection*{Boundary Conditions}
+
+The natural boundary conditions derived from the variational principle are:  
+At any boundary ($x = 0$ or $x = L$), either the displacement or the corresponding force resultant must be specified:
+
+\[
+u_0 \; \text{specified} \quad \text{or} \quad N = 0
+\]
+
+\[
+w_0 \; \text{specified} \quad \text{or} \quad V_x = 0
+\]
+
+\[
+\frac{\partial w_0}{\partial x} \; \text{specified} \quad \text{or} \quad M = 0
+\]
+
+\[
+\psi_0 \; \text{specified} \quad \text{or} \quad P = 0
+\]
+
+These governing equations and boundary conditions completely characterize the dynamic behavior of three-layer zigzag beams. The theory captures the essential physics of layered structures through the zigzag displacement field while maintaining computational efficiency through the use of only three generalized displacement variables. The coupling between axial, bending, and zigzag effects through the inertia terms enables accurate prediction of wave propagation phenomena in laminated composite beams.
+
+\subsection{Finite Element Implementation of Zigzag Theory}
+
+The finite element method provides a systematic approach for discretizing the continuous zigzag beam theory into a computationally tractable form. The implementation requires careful consideration of interpolation functions, element formulation, and assembly procedures to maintain theoretical accuracy while ensuring numerical stability.
+
+\subsubsection*{Element Formulation and Interpolation Functions}
+
+The zigzag beam is discretized using two-node beam elements with enhanced kinematics. Each element contains physical nodes at its ends, and the nodal degrees of freedom are selected to ensure compatibility with the governing equations and continuity requirements.
+
+At each node $i$, the degrees of freedom are defined as:
+\begin{equation}
+    \mathbf{q}_i = \begin{Bmatrix} u_{0i} \\ w_{0i} \\ \theta_i \\ \psi_{0i} \end{Bmatrix}
+\end{equation}
+
+where $u_{0i}$ and $w_{0i}$ are the axial and transverse displacements, $\theta_i$ is the rotation of the transverse normal, and $\psi_{0i}$ is the zigzag amplitude.
+
+The complete element displacement vector is:
+\begin{equation}
+    \mathbf{q}^e = \begin{Bmatrix} u_{01} \\ w_{01} \\ \theta_1 \\ \psi_{01} \\ u_{02} \\ w_{02} \\ \theta_2 \\ \psi_{02} \end{Bmatrix}.
+\end{equation}
+
+
+Linear Lagrange interpolation is employed for $u_0$ and $\psi_0$, while cubic Hermite interpolation is used for $w_0$ to ensure $C^1$ continuity. The interpolation functions are expressed in matrix form as:
+\begin{equation}
+   \begin{Bmatrix} u_0(\xi) \\ w_0(\xi) \\ \psi_0(\xi) \end{Bmatrix} 
+= \mathbf{N}(\xi) \, \mathbf{q}^e,
+\end{equation}
+
+where $\mathbf{N}(\xi)$ is the shape function matrix and $\xi$ is the natural coordinate.
+
+\subsection*{Strain-Displacement Matrix Formulation}
+
+The strain-displacement relationships are derived by differentiating the interpolation functions. The axial and transverse shear strains are given by:
+\begin{equation}
+    \varepsilon_x = \frac{\partial u_0}{\partial x} - z \frac{\partial^2 w_0}{\partial x^2} + R^{(k)}(z)\frac{\partial \psi_0}{\partial x}
+\end{equation}
+
+\begin{equation}
+    \gamma_{xz} = \frac{\partial R^{(k)}}{\partial z} \psi_0 + \frac{\partial w_0}{\partial x}
+\end{equation}
+
+
+These relations are expressed in terms of nodal displacements through the strain-displacement matrix $\mathbf{B}^{(k)}$ for layer $k$.
+
+\subsubsection*{Element Mass Matrix}
+
+The element mass matrix is derived from the kinetic energy expression, which involves velocity products of the interpolated displacement field. The general form is:
+\begin{equation}
+    \mathbf{M}^e = \int_{-1}^{+1} \sum_{k=1}^{N} \int_{z_{k-1}}^{z_k} 
+\rho^{(k)} \left[ \mathbf{N}_u^T \mathbf{N}_u + \mathbf{N}_w^T \mathbf{N}_w \right] b \, \frac{l_e}{2} \, dz \, d\xi,
+\end{equation}
+
+where $\rho^{(k)}$ is the density of layer $k$, and $\mathbf{N}_u$, $\mathbf{N}_w$ are the submatrices of $\mathbf{N}$ associated with axial and transverse displacements.
+
+\subsubsection*{Element Stiffness Matrix}
+
+The element stiffness matrix is obtained from the strain energy:
+\begin{equation}
+    \mathbf{K}^e = \int_{-1}^{+1} \sum_{k=1}^{N} \int_{z_{k-1}}^{z_k} 
+(\mathbf{B}^{(k)})^T \mathbf{D}^{(k)} \mathbf{B}^{(k)} \, b \, \frac{l_e}{2} \, dz \, d\xi
+\end{equation}
+
+where $\mathbf{D}^{(k)}$ is the constitutive matrix of layer $k$. The layerwise zigzag function $R^{(k)}(z)$ and its derivative introduce coupling terms that enrich the kinematics of the beam element.
+
+\subsubsection*{Numerical Integration and Assembly}
+
+Numerical integration is employed due to the complexity of the integrands involving the zigzag function and material heterogeneity. Gaussian quadrature is applied in both the in-plane and through-thickness directions, with integration performed separately within each layer. The global mass and stiffness matrices are assembled from the element contributions, yielding the system:
+\begin{equation}
+\mathbf{M} \ddot{\mathbf{Q}} + \mathbf{C} \dot{\mathbf{Q}} + \mathbf{K} \mathbf{Q} = \mathbf{F}(t),
+\end{equation}
+where $\mathbf{Q}$ is the global displacement vector.
+
+
+
+
+
+
+
+
+
+
+
+\section{2D Elastic Beam Theory}
+\label{sec:2d_elastic_theory}
+
+The two-dimensional elastic beam theory represents the foundational framework for high-fidelity reference solutions in structural analysis, particularly when investigating complex deformation patterns and stress distributions in beam structures with geometric discontinuities. Unlike one-dimensional beam theories that rely on kinematic assumptions about displacement field variations, two-dimensional finite element approaches directly solve the governing equations of elasticity without introducing simplifying assumptions regarding through-thickness behavior.
+
+The two-dimensional formulation provides essential advantages for analyzing structures with geometric irregularities such as notches, where classical beam theory assumptions may become invalid. The approach captures local stress concentrations, complex deformation patterns near discontinuities, and the full stress tensor field throughout the structure, making it particularly suitable for validation of reduced-order modeling approaches and for establishing reference solutions in comparative analysis studies.
+
+\subsubsection{Fundamental Governing Equations}
+
+The two-dimensional elastic beam analysis is based on the fundamental equations of linear elasticity theory, which consist of equilibrium equations, kinematic relations, and constitutive laws. For a two-dimensional domain under plane stress or plane strain conditions, these equations provide a complete mathematical description of the mechanical behavior.
+
+The equilibrium equations in the absence of body forces are expressed as:
+
+\begin{equation}
+\frac{\partial \sigma_{xx}}{\partial x} + \frac{\partial \sigma_{xy}}{\partial y} = 0
+\end{equation}
+\begin{equation}
+\frac{\partial \sigma_{xy}}{\partial x} + \frac{\partial \sigma_{yy}}{\partial y} = 0
+\end{equation}
+
+where $\sigma_{xx}$, $\sigma_{yy}$, and $\sigma_{xy}$ represent the components of the Cauchy stress tensor in the two-dimensional coordinate system. These equations ensure force equilibrium at every point within the elastic continuum.
+
+The kinematic relations connect the displacement field components $u(x,y)$ and $v(x,y)$ to the strain components through the standard strain-displacement relationships:
+
+\begin{equation}
+\varepsilon_{xx} = \frac{\partial u}{\partial x}, \quad
+\varepsilon_{yy} = \frac{\partial v}{\partial y}, \quad
+\gamma_{xy} = \frac{\partial u}{\partial y} + \frac{\partial v}{\partial x}
+\end{equation}
+
+These relationships are exact for infinitesimal strain theory and provide the geometric compatibility conditions necessary for ensuring that the strain field corresponds to a continuous displacement field.
+
+\subsubsection{Constitutive Relations for Homogeneous Materials}
+
+For homogeneous isotropic materials, the constitutive relations relate stress and strain components through material parameters that remain constant throughout the domain. The stress-strain relationship depends on whether plane stress or plane strain conditions are assumed.
+
+Under plane stress conditions, appropriate for thin structures where the stress in the thickness direction is negligible, the constitutive relations are:
+
+\begin{equation}
+\begin{Bmatrix} 
+\sigma_{xx} \\ 
+\sigma_{yy} \\ 
+\sigma_{xy} 
+\end{Bmatrix} 
+= \frac{E}{1-\nu^2} 
+\begin{bmatrix} 
+1 & \nu & 0 \\ 
+\nu & 1 & 0 \\ 
+0 & 0 & \frac{1-\nu}{2} 
+\end{bmatrix} 
+\begin{Bmatrix} 
+\varepsilon_{xx} \\ 
+\varepsilon_{yy} \\ 
+\gamma_{xy} 
+\end{Bmatrix}
+\end{equation}
+
+For plane strain conditions, suitable for thick structures where strain in the thickness direction is constrained, the material stiffness matrix becomes:
+
+\begin{equation}
+\begin{Bmatrix} 
+\sigma_{xx} \\ 
+\sigma_{yy} \\ 
+\sigma_{xy} 
+\end{Bmatrix} 
+= \frac{E}{(1+\nu)(1-2\nu)} 
+\begin{bmatrix} 
+1-\nu & \nu & 0 \\ 
+\nu & 1-\nu & 0 \\ 
+0 & 0 & \frac{1-2\nu}{2} 
+\end{bmatrix} 
+\begin{Bmatrix} 
+\varepsilon_{xx} \\ 
+\varepsilon_{yy} \\ 
+\gamma_{xy} 
+\end{Bmatrix}
+\end{equation}
+
+In these expressions, $E$ represents Young's modulus and $\nu$ denotes Poisson's ratio, which are the fundamental material constants characterizing the elastic behavior of homogeneous isotropic materials.
+
+\subsubsection{Finite Element Discretization}
+
+The solution of the two-dimensional elasticity equations typically requires numerical methods due to the complexity of boundary conditions and geometric configurations encountered in practical applications. The finite element method provides a systematic approach for discretizing the continuum problem into a system of algebraic equations.
+
+The displacement field within each finite element is approximated using shape functions $N_i(x,y)$ and nodal displacement values:
+
+\begin{equation}
+u(x,y) = \sum_{i=1}^{n} N_i(x,y) u_i, \quad
+v(x,y) = \sum_{i=1}^{n} N_i(x,y) v_i
+\end{equation}
+
+where $n$ represents the number of nodes per element, and $u_i$, $v_i$ are the displacement components at node $i$.
+
+The strain components are obtained by differentiating the displacement approximations:
+
+\begin{equation}
+\begin{Bmatrix} 
+\varepsilon_{xx} \\ 
+\varepsilon_{yy} \\ 
+\gamma_{xy} 
+\end{Bmatrix} 
+= \sum_{i=1}^{n} 
+\begin{bmatrix} 
+\frac{\partial N_i}{\partial x} & 0 \\ 
+0 & \frac{\partial N_i}{\partial y} \\ 
+\frac{\partial N_i}{\partial y} & \frac{\partial N_i}{\partial x} 
+\end{bmatrix} 
+\begin{Bmatrix} 
+u_i \\ 
+v_i 
+\end{Bmatrix}
+\end{equation}
+
+This relationship defines the strain-displacement matrix $\mathbf{B}_i$ that relates nodal displacements to element strains.
+
+\subsubsection{Element Types and Formulations}
+
+Contemporary finite element implementations for two-dimensional elasticity problems employ various element types, each with specific advantages depending on the application requirements. The most commonly used elements include triangular and quadrilateral configurations with different orders of approximation.
+
+Linear triangular elements utilize three nodes and provide constant strain within each element. These elements are particularly effective for automatic mesh generation in complex geometries but may require significant mesh refinement to achieve acceptable accuracy in stress concentration regions.
+
+Quadrilateral elements with bilinear shape functions employ four nodes and offer improved accuracy compared to linear triangular elements for regular mesh configurations. These elements maintain computational efficiency while providing better representation of bending modes and stress gradients.
+
+Higher-order elements, such as quadratic triangular or serendipity quadrilateral elements, incorporate additional nodes along element edges or within the element interior. These formulations provide enhanced accuracy for smooth stress fields but require increased computational effort and may exhibit sensitivity to element distortion.
+
+\subsubsection{Boundary Conditions and Loading}
+
+The specification of appropriate boundary conditions is crucial for obtaining meaningful solutions to two-dimensional elasticity problems. Essential boundary conditions prescribe displacement values at specific locations, while natural boundary conditions specify traction forces or stress components.
+
+For beam-like structures, typical boundary conditions include:
+
+\begin{itemize}
+    \item \textbf{Fixed support conditions}: where both displacement components are prescribed as zero:
+    \[
+    u = v = 0
+    \]
+
+    \item \textbf{Simply supported conditions}: where normal displacement is constrained while tangential displacement remains free:
+    \[
+    v = 0, \quad \sigma_{xy} = 0
+    \]
+
+    \item \textbf{Applied tractions on boundary surfaces}: incorporated through the natural boundary conditions:
+    \[
+    \sigma_{xx} n_x + \sigma_{xy} n_y = t_x
+    \]
+    \[
+    \sigma_{xy} n_x + \sigma_{yy} n_y = t_y
+    \]
+\end{itemize}
+
+where $(n_x, n_y)$ represents the outward normal vector to the boundary and $(t_x, t_y)$ denotes the prescribed traction components.
+
+\subsubsection{Treatment of Geometric Discontinuities}
+
+The analysis of structures with geometric discontinuities such as notches requires special consideration in mesh design and solution interpretation. The presence of sharp corners and material boundaries creates stress concentrations that demand adequate spatial resolution for accurate capture.
+
+Mesh refinement strategies near geometric discontinuities typically employ graded meshes with element sizes decreasing toward the discontinuity. The rate of mesh refinement must balance computational efficiency with solution accuracy, particularly in regions where stress gradients become severe.
+
+The treatment of notch geometries requires careful attention to the representation of sharp corners and the transition between different geometric regions. The finite element discretization must accurately represent the geometric boundaries while maintaining element quality metrics necessary for stable numerical solutions.
+
+
+\section{Machine Learning Foundations}
+\label{sec:ml_foundations}
+
+\subsection{Autoencoder Architecture}
+
+\subsection*{Autoencoder Architecture}
+
+\subsubsection*{Fundamental Principles and Mathematical Framework}
+
+Autoencoders represent a class of artificial neural networks designed to learn efficient data representations through unsupervised learning methodologies. These neural architectures fundamentally operate on the principle of information compression and reconstruction, where the network learns to map input data to a lower-dimensional latent representation and subsequently reconstruct the original input from this compressed encoding. The mathematical foundation of autoencoders rests upon the optimization of a reconstruction loss function that measures the fidelity between the original input and its reconstructed counterpart.
+
+The canonical autoencoder architecture comprises two primary components: an encoder function 
+\[
+E_{\phi}: \mathbb{R}^{d} \rightarrow \mathbb{R}^{p}
+\]
+parameterized by $\phi$ that maps input data $\mathbf{x} \in \mathbb{R}^{d}$ to a latent representation 
+\[
+\mathbf{z} = E_{\phi}(\mathbf{x}) \in \mathbb{R}^{p},
+\]
+and a decoder function
+\[
+D_{\theta}: \mathbb{R}^{p} \rightarrow \mathbb{R}^{d}
+\]
+parameterized by $\theta$ that reconstructs the input as 
+\[
+\hat{\mathbf{x}} = D_{\theta}(\mathbf{z}).
+\]
+The dimensionality constraint $p < d$ ensures that the latent space represents a compressed encoding, forcing the network to learn meaningful representations rather than simply memorizing the input data.
+
+The training objective for standard autoencoders involves minimizing the reconstruction loss:
+\[
+\mathcal{L}(\theta, \phi) = \mathbb{E}_{x \sim \mu_{X}} \left[d\big(x, D_{\theta}(E_{\phi}(x))\big)\right],
+\]
+where $d(\cdot, \cdot)$ represents a distance metric, commonly the squared Euclidean norm for continuous data or cross-entropy loss for discrete representations. This optimization framework enables the autoencoder to learn latent representations that capture the essential characteristics of the input distribution while discarding redundant or noisy information.
+
+\subsubsection*{Conditional Autoencoder Framework}
+
+Conditional autoencoders extend the fundamental autoencoder architecture by incorporating additional conditioning information that guides the encoding and decoding processes. This architectural enhancement enables the learned representations to be explicitly dependent on auxiliary variables, making them particularly suitable for applications requiring parameter-aware feature extraction and controlled generation capabilities.
+
+The mathematical formulation of conditional autoencoders modifies the encoder and decoder functions to accept conditioning variables $\mathbf{c}$. The conditional encoder becomes
+\[
+E_{\phi}: \mathbb{R}^{d} \times \mathbb{R}^{m} \rightarrow \mathbb{R}^{p},
+\]
+where $\mathbf{c} \in \mathbb{R}^{m}$ represents the conditioning parameters, resulting in the latent representation
+\[
+\mathbf{z} = E_{\phi}(\mathbf{x}, \mathbf{c}).
+\]
+Similarly, the conditional decoder transforms to
+\[
+D_{\theta}: \mathbb{R}^{p} \times \mathbb{R}^{m} \rightarrow \mathbb{R}^{d},
+\]
+enabling reconstruction as
+\[
+\hat{\mathbf{x}} = D_{\theta}(\mathbf{z}, \mathbf{c}).
+\]
+
+Recent advances in conditional autoencoder architectures have demonstrated remarkable success in engineering applications. Li et al. (2024) introduced the Mechanics-Informed Damage Assessment of Structures (MIDAS) framework, which integrates mechanical characteristics directly into autoencoder architectures through pairwise mechanical loss terms, achieving 35\% improvement in minor damage detection accuracy. This breakthrough illustrates how physics-informed conditioning can enhance the representational capabilities of autoencoders for structural engineering applications.
+
+The conditioning mechanism can be implemented through various architectural strategies. Parameter concatenation approaches directly append conditioning variables to input layers of both encoder and decoder networks. Alternatively, feature modulation techniques employ conditional batch normalization or attention mechanisms to adaptively modify internal representations based on conditioning information. These architectural choices significantly influence the model's ability to capture parameter-dependent relationships within the learned latent space.
+
+\subsubsection*{Architectural Variants and Recent Developments}
+
+The autoencoder family encompasses numerous architectural variants, each designed to address specific limitations or application requirements. Variational autoencoders introduce probabilistic latent representations through variational inference, enabling generative capabilities while maintaining reconstruction fidelity. Denoising autoencoders incorporate robustness to input corruption through training with artificially degraded inputs, learning representations that capture essential data structure while discarding noise artifacts.
+
+Sparse autoencoders enforce sparsity constraints on latent representations through regularization terms, promoting the discovery of interpretable features. The sparsity penalty is typically formulated as:
+\[
+\Omega(\mathbf{h}) = \lambda \sum_{i=1}^{p} |\mathbf{h}_i|,
+\]
+where $\mathbf{h}$ represents the hidden layer activations and $\lambda$ controls the regularization strength. This approach encourages the network to use only a subset of latent dimensions for reconstruction, often resulting in more interpretable and generalizable representations.
+
+Convolutional autoencoders adapt the autoencoder framework for spatial data by employing convolutional and transpose convolutional layers, preserving spatial relationships within the learned representations. These architectures have proven particularly effective for structural response data that exhibits spatial dependencies, such as strain fields or displacement patterns in beam structures.
+
+Recent developments in autoencoder architectures emphasize the integration of attention mechanisms and residual connections. Zhang et al. (2024) demonstrated that attention-enhanced conditional autoencoders achieve over 60\% data reduction compared to traditional Principal Component Analysis while maintaining superior reconstruction accuracy for aircraft structural deformation modeling. The attention mechanism enables the network to focus on relevant spatial or temporal features during encoding and decoding processes.
+
+\subsection*{Applications in Structural Engineering and Response Prediction}
+
+Autoencoders have gained prominence in structural engineering, particularly in structural health monitoring (SHM), damage detection, and response prediction. Their ability to learn compact yet informative representations makes them suitable for processing high-dimensional structural response data while retaining essential physics.
+
+In SHM, autoencoders function as anomaly detectors by learning baseline representations of undamaged states; deviations manifest as higher reconstruction errors. The MIDAS framework illustrates this principle, achieving autonomous damage localization after limited baseline training. For response prediction, conditional autoencoders map structural parameters---such as geometry, material properties, loading, and boundary conditions---to responses, enabling rapid prediction of structural behavior.
+
+Mechanics-informed loss functions mark a major advancement by embedding domain knowledge into training, yielding higher accuracy under scarce data compared to purely data-driven methods. Recent work by Oestreich et al. (2024) shows that optimized architectures can retain reconstruction quality while requiring $97\%$ less training data and $36\%$ less energy, highlighting the importance of efficient design.
+
+\subsubsection*{Parameter Conditioning Strategies}
+
+The implementation of parameter conditioning in autoencoders for structural applications requires careful consideration of the relationship between conditioning variables and target responses. Structural parameters such as geometric dimensions, material properties, and loading conditions exhibit complex interactions that influence the optimal conditioning strategy. Direct parameter concatenation represents the simplest conditioning approach, where parameter vectors are concatenated with input data at the network input layer. This strategy works effectively when the parameter space is relatively low-dimensional and the parameter-response relationships are predominantly linear. However, for complex structural systems with highly nonlinear parameter dependencies, more sophisticated conditioning mechanisms may be required. Feature modulation approaches employ learned transformations of conditioning parameters to modify internal network representations. These strategies enable the conditioning information to influence the encoding and decoding processes at multiple hierarchical levels, capturing both local and global parameter dependencies. Conditional batch normalization exemplifies this approach, where normalization parameters are computed as functions of conditioning variables. Attention-based conditioning mechanisms represent the most advanced approach, enabling dynamic weighting of features based on parameter values. This strategy proves particularly valuable for structural applications where the relevance of specific response characteristics varies significantly across the parameter space. For instance, in notched beam analysis, the attention mechanism can adaptively focus on stress concentration regions based on notch geometry parameters.
+
+\subsubsection*{Latent Space Organization and Interpretability}
+
+Latent representation structure is central for interpretability and transferability. Disentangled latent spaces, where specific dimensions align with physical attributes, can be promoted via $\beta$-VAE style regularization. Latent dimensionality must balance fidelity with efficiency: too few dimensions cause information loss, while too many risk overfitting. Studies suggest optimal scaling roughly logarithmic with input size.
+
+\subsubsection*{Integration with Multi-Fidelity Frameworks}
+
+The integration of conditional autoencoders within multi-fidelity modeling frameworks represents a promising direction for computational structural mechanics. These frameworks leverage autoencoders to learn mappings between different fidelity levels, enabling the construction of computationally efficient surrogate models that maintain high accuracy. In multi-fidelity applications, conditional autoencoders serve multiple roles simultaneously. They function as dimensionality reduction tools for high-dimensional response data, parameter-to-response mappers for rapid prediction, and discrepancy learners for correcting low-fidelity model predictions. This versatility makes them particularly valuable for applications requiring real-time structural analysis capabilities. The success of autoencoder-based multi-fidelity approaches depends critically on the availability of aligned training data across fidelity levels. Transfer learning techniques can partially address data scarcity issues by leveraging representations learned from one fidelity level to initialize models for another. However, significant fidelity gaps may require specialized architectural modifications or training protocols to ensure effective knowledge transfer. The conditional autoencoder architecture represents a fundamental building block for advanced surrogate modeling approaches in structural engineering. Its capacity to learn parameter-dependent representations while maintaining computational efficiency makes it ideally suited for applications requiring rapid structural response prediction capabilities. The integration of domain knowledge through mechanics-informed loss functions and conditioning strategies enables these architectures to capture essential physics while
+
+
+\subsection{U-Net Architecture}
+
+The U-Net architecture represents a foundational advancement in convolutional neural network design for dense prediction tasks, fundamentally transforming how spatial information is preserved and utilized in encoder-decoder frameworks. Originally conceived by Ronneberger et al. in 2015 for biomedical image segmentation, the U-Net has evolved into a versatile architectural paradigm that extends far beyond its initial domain, finding particular relevance in structural engineering applications where spatial relationships and multi-scale feature extraction are critical.
+
+\subsubsection*{Theoretical Foundations of U-Net Design}
+
+The U-Net architecture addresses fundamental limitations inherent in traditional encoder-decoder networks, particularly the information bottleneck problem that occurs when spatial details are compressed and subsequently reconstructed. In conventional autoencoder architectures, the encoding process progressively reduces spatial dimensions while increasing feature depth, creating a compressed latent representation that must then be expanded back to the original spatial resolution. This compression-decompression cycle inevitably leads to information loss, particularly affecting fine-grained spatial details essential for precise localization tasks.
+
+The revolutionary insight underlying U-Net design lies in the introduction of skip connections that directly bridge corresponding layers in the encoder and decoder pathways. These connections enable the preservation of multi-scale spatial information throughout the network, allowing the decoder to access both high-level semantic features from the deepest layers and fine-grained spatial details from earlier encoding stages. This architectural innovation creates a symmetric U-shaped structure that gives the network its distinctive name and exceptional performance characteristics.
+
+The mathematical formulation of U-Net skip connections can be expressed as:
+
+\begin{equation}
+\mathbf{d}_i = \mathcal{D}_i\big(\text{concat}(\mathbf{u}_i, \mathbf{e}_i)\big)
+\end{equation}
+
+where $\mathbf{d}_i$ represents the decoder output at level $i$, $\mathcal{D}_i$ denotes the decoder operation, $\mathbf{u}_i$ is the upsampled feature from the previous decoder level, and $\mathbf{e}_i$ represents the corresponding encoder features. The concatenation operation preserves both semantic and spatial information, enabling precise reconstruction of complex spatial patterns.
+
+\subsubsection*{Conditional Autoencoder Integration with U-Net Principles}
+
+For structural response prediction applications, the U-Net architecture must be enhanced with conditional capabilities that enable parameter-aware feature learning. Traditional autoencoders learn unconditional mappings between input and output spaces, limiting their ability to adapt predictions based on varying structural configurations. Conditional autoencoders address this limitation by incorporating additional input parameters that guide the encoding and decoding processes, enabling the network to generate responses conditioned on specific geometric and material properties.
+
+The integration of conditional mechanisms with U-Net architecture creates a powerful framework for multi-fidelity surrogate modeling. In the context of structural analysis, the conditioning parameters typically include geometric properties such as beam dimensions, material characteristics including elastic moduli and density, and defect parameters describing notch locations and sizes. These parameters can be incorporated into the U-Net framework through multiple conditioning strategies, each offering distinct advantages for different aspects of the prediction task.
+
+Parameter injection at multiple network levels represents the most sophisticated conditioning approach. Rather than introducing conditional information only at the input or bottleneck layers, this strategy embeds parameter-derived features throughout the encoder-decoder hierarchy. This approach ensures that structural parameters influence feature extraction and reconstruction at all spatial scales, enabling the network to adapt both global response patterns and local detail preservation based on the specific structural configuration being analyzed.
+
+The mathematical formulation for multi-level parameter conditioning can be expressed as:
+
+\begin{equation}
+\mathbf{e}_i = \mathcal{E}_i(\mathbf{e}_{i-1}, \mathcal{P}_i(\boldsymbol{\theta}))
+\end{equation}
+
+where $\mathcal{P}_i(\boldsymbol{\theta})$ represents the parameter projection function that transforms the structural parameters $\boldsymbol{\theta}$ into feature-compatible representations at encoder level $i$. This conditioning mechanism enables the network to modulate feature extraction based on structural characteristics, leading to more accurate and physically consistent predictions.
+
+\subsubsection*{Advanced U-Net Modifications for Structural Applications}
+
+The application of U-Net architectures to structural response prediction requires specialized modifications that address the unique characteristics of engineering data. Unlike natural images that exhibit statistical regularities and texture patterns, structural response fields demonstrate complex spatial-temporal correlations governed by underlying physical principles. These characteristics necessitate architectural enhancements that preserve physical consistency while maintaining computational efficiency.
+
+\paragraph{Attention Mechanisms}  
+Attention mechanisms represent one of the most significant advances in U-Net design for structural applications. Traditional skip connections transfer all features from encoder to decoder without discrimination, potentially introducing noise or irrelevant information that can degrade prediction accuracy. Attention-enhanced skip connections address this limitation by implementing learned gating mechanisms that selectively emphasize relevant features while suppressing irrelevant information.
+
+The attention gate mechanism can be formulated as:
+
+\begin{equation}
+\alpha_i = \sigma(\mathbf{W}_g^T \mathbf{g}_i + \mathbf{W}_x^T \mathbf{x}_i + \mathbf{b}_g)
+\end{equation}
+\begin{equation}
+\hat{\mathbf{x}}_i = \alpha_i \odot \mathbf{x}_i
+\end{equation}
+
+where $\alpha_i$ represents the attention coefficients, $\mathbf{g}_i$ is the gating signal from the deeper layer, $\mathbf{x}_i$ denotes the input features, and $\hat{\mathbf{x}}_i$ is the attention-weighted output. The element-wise multiplication $\odot$ applies the learned attention weights to selectively emphasize important spatial regions while suppressing irrelevant areas.
+
+\paragraph{Residual Connections}  
+Residual connections within U-Net blocks provide another crucial enhancement for structural applications. The incorporation of residual learning principles enables the network to learn incremental improvements rather than complete transformations, facilitating more stable training and improved gradient flow. For structural response prediction, residual connections prove particularly valuable in preserving baseline response patterns while learning problem-specific modifications introduced by geometric variations or material changes.
+
+\subsubsection*{Multi-Scale Feature Fusion Strategies}
+
+Structural response prediction often requires the simultaneous consideration of phenomena occurring at multiple spatial scales. Global structural behavior patterns must be captured alongside local effects such as stress concentrations around notches or material interfaces. Traditional U-Net architectures address multi-scale requirements through the natural hierarchy of encoder-decoder features, but specialized fusion strategies can enhance this capability for structural applications.
+
+Dense skip connections represent an advanced feature fusion approach that extends beyond simple concatenation. Instead of connecting only corresponding encoder-decoder levels, dense connections create pathways between all possible layer combinations, enabling comprehensive multi-scale information flow. This approach proves particularly valuable for structural applications where interactions between different spatial scales significantly influence response patterns.
+
+The mathematical representation of dense skip connections incorporates features from multiple encoder levels:
+
+\begin{equation}
+\mathbf{d}_i = \mathcal{D}_i\big(\text{concat}(\mathbf{u}_i, \mathbf{e}_i, \mathcal{T}_{i-1}(\mathbf{e}_{i-1}), \ldots, \mathcal{T}_1(\mathbf{e}_1))\big)
+\end{equation}
+
+where $\mathcal{T}_j$ represents transformation operations that adapt features from encoder level $j$ to be compatible with decoder level $i$. This comprehensive feature fusion enables the network to integrate information across all spatial scales simultaneously.
+
+\subsubsection*{Parameter-Aware Feature Processing}
+
+The unique requirements of structural response prediction necessitate specialized approaches to parameter integration that go beyond simple concatenation or addition. Structural parameters exhibit complex interdependencies and non-linear relationships that must be properly encoded and propagated throughout the network. Advanced parameter processing techniques ensure that these relationships are preserved and effectively utilized during the prediction process.
+
+Feature-wise affine transformations represent one sophisticated parameter integration strategy. Rather than treating parameters as additional input channels, this approach uses parameter-derived scaling and bias terms to modulate existing features throughout the network. This technique enables parameters to influence feature processing in a multiplicative manner, creating more nuanced and physically meaningful parameter-response relationships.
+
+The feature-wise affine transformation can be expressed as:
+
+\begin{equation}
+\mathbf{f}_{transformed} = \gamma(\boldsymbol{\theta}) \odot \mathbf{f}_{original} + \beta(\boldsymbol{\theta})
+\end{equation}
+
+where $\gamma(\boldsymbol{\theta})$ and $\beta(\boldsymbol{\theta})$ are parameter-derived scaling and bias terms respectively. This formulation allows structural parameters to adaptively modulate feature activations throughout the network, enabling more sophisticated parameter-response modeling.
+
+\subsubsection*{Loss Function Considerations for Structural Applications}
+
+The training of U-Net architectures for structural response prediction requires carefully designed loss functions that reflect the physical nature of the prediction task. Traditional mean squared error loss, while mathematically convenient, may not adequately capture the spatial and temporal correlations inherent in structural response data. Advanced loss formulations incorporate domain-specific constraints and physically meaningful metrics to guide the learning process toward solutions that respect underlying structural mechanics principles.
+
+Multi-scale loss functions represent one important advancement for structural applications. These loss formulations evaluate prediction accuracy at multiple spatial resolutions, ensuring that both global response patterns and local details are accurately captured. The mathematical formulation combines losses computed at different scales:
+
+\begin{equation}
+\mathcal{L}_{multi-scale} = \sum_{s=1}^{S} w_s \, \mathcal{L}_{MSE}(\mathcal{D}_s(\mathbf{y}_{pred}), \mathcal{D}_s(\mathbf{y}_{true}))
+\end{equation}
+
+where $\mathcal{D}_s$ represents downsampling operation to scale $s$, and $w_s$ denotes scale-specific weights that balance the contribution of different resolution levels.
+
+Temporal consistency losses prove particularly important for dynamic structural response prediction. These loss terms penalize unrealistic temporal discontinuities or physically impossible response patterns, encouraging the network to learn solutions that exhibit realistic dynamic behavior. The incorporation of physics-informed constraints through specialized loss terms ensures that predictions remain within physically plausible bounds while maintaining high accuracy.
+
+
+
+\subsection{XGBoost Algorithm for Multi-Fidelity Parameter Mapping}
+
+\subsubsection*{Theoretical Foundation of Extreme Gradient Boosting}
+
+Extreme Gradient Boosting (XGBoost), developed by Chen and Guestrin in 2016, represents a sophisticated implementation of gradient boosting that has revolutionized machine learning applications across diverse engineering domains. The algorithm's mathematical foundation rests on the principle of sequentially adding weak learners to minimize prediction errors through advanced optimization techniques that extend beyond traditional gradient boosting frameworks.
+
+The fundamental mathematical formulation of XGBoost can be expressed as an ensemble of $K$ regression trees:
+
+\begin{equation}
+\hat{y}_i = \sum_{k=1}^K f_k(x_i)
+\end{equation}
+
+where $f_k \in \mathcal{F}$ represents individual tree functions within the functional space $\mathcal{F}$ of all possible Classification and Regression Trees (CART).  
+The optimization objective incorporates both loss minimization and regularization terms:
+
+\begin{equation}
+\text{obj}(\theta) = \sum_{i=1}^n l(y_i, \hat{y}_i) + \sum_{k=1}^K \Omega(f_k)
+\end{equation}
+
+where $l(y_i, \hat{y}_i)$ represents the loss function measuring prediction accuracy, and $\Omega(f_k)$ denotes the complexity regularization term that controls overfitting.
+
+The distinctive advancement of XGBoost over traditional gradient boosting lies in its utilization of second-order Taylor approximation for loss function optimization. This approach, analogous to Newton-Raphson methods in function space, enables more precise gradient estimation and faster convergence.  
+The second-order expansion of the loss function at iteration $t$ yields:
+
+\begin{equation}
+L^{(t)} \approx \sum_{i=1}^n \Big[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \Big] + \Omega(f_t)
+\end{equation}
+
+where $g_i$ and $h_i$ represent the first and second-order gradients respectively:
+
+\begin{equation}
+g_i = \frac{\partial l(y_i, \hat{y}_i^{(t-1)})}{\partial \hat{y}_i^{(t-1)}}, 
+\qquad 
+h_i = \frac{\partial^2 l(y_i, \hat{y}_i^{(t-1)})}{\partial (\hat{y}_i^{(t-1)})^2}
+\end{equation}
+
+---
+
+\subsubsection*{XGBoost Architecture for Structural Parameter Mapping}
+
+In the context of multi-fidelity surrogate modeling for structural response prediction, XGBoost serves as the critical parameter mapping component that establishes relationships between geometric parameters, material properties, and reduced-order representations of structural responses. The algorithm's exceptional capability for handling complex feature interactions makes it particularly suitable for capturing nonlinear relationships between beam geometry parameters (length, notch dimensions, material properties) and latent space representations generated by autoencoder architectures.
+
+The regularization framework in XGBoost incorporates both $L1$ and $L2$ penalties to control model complexity and prevent overfitting, which is crucial when dealing with limited high-fidelity training data common in structural engineering applications:
+
+\begin{equation}
+\Omega(f_t) = \gamma T + \frac{1}{2} \lambda \sum_{j=1}^T w_j^2 + \alpha \sum_{j=1}^T |w_j|
+\end{equation}
+
+where $T$ represents the number of leaves, $w_j$ denotes the weight of leaf $j$, and $\gamma, \lambda, \alpha$ are regularization parameters controlling tree complexity, $L2$ regularization, and $L1$ regularization respectively.
+
+The algorithm's built-in handling of missing values through sparsity-aware split finding algorithms proves particularly advantageous in structural engineering contexts where certain parameter combinations may be physically invalid or computationally intractable. The parallel tree construction and advanced memory optimization techniques enable efficient processing of high-dimensional parameter spaces typical in multi-fidelity structural analysis frameworks.
+
+---
+
+\subsubsection*{Conditional Autoencoders for Structural Response Representation}
+
+Conditional Autoencoders (CAE) represent a sophisticated extension of traditional autoencoder architectures that incorporate external conditioning information during both encoding and decoding processes. This conditioning mechanism proves essential for structural response prediction where the relationship between input parameters and output responses must account for geometric configurations, material properties, and boundary conditions.
+
+The mathematical formulation of a conditional autoencoder extends the standard autoencoder framework by introducing conditioning variables $c$ that modulate both the encoding and decoding processes:
+
+\begin{align}
+z &= f_{\phi}(x, c) \quad &\text{(Encoder Network)} \\
+\hat{x} &= g_{\theta}(z, c) \quad &\text{(Decoder Network)}
+\end{align}
+
+where $x$ represents the input structural response data, $c$ denotes the conditioning parameters (geometric and material properties), $z$ represents the latent space encoding, and $\phi, \theta$ are the learned parameters for encoder and decoder networks respectively.
+
+The conditioning mechanism can be implemented through various architectural strategies, including parameter concatenation, feature modulation, or adaptive instance normalization. For structural response prediction, parameter concatenation represents the most straightforward approach where conditioning vectors are concatenated with input features at multiple network layers:
+
+\begin{equation}
+h^{(l+1)} = \sigma \Big( W^{(l)} [h^{(l)}; c] + b^{(l)} \Big)
+\end{equation}
+
+where $h^{(l)}$ represents the hidden state at layer $l$, $[h^{(l)}; c]$ denotes the concatenation operation, and $\sigma$ is the activation function.
+
+---
+
+\subsubsection*{Integration Strategy for Multi-Fidelity Frameworks}
+
+The integration of XGBoost with conditional autoencoders in multi-fidelity surrogate modeling follows a two-stage architecture that leverages the complementary strengths of both methodologies. The conditional autoencoder provides dimensionality reduction and feature extraction capabilities for high-dimensional structural response data, while XGBoost enables robust parameter-to-latent space mapping with exceptional generalization performance.
+
+\textbf{Stage 1: Response Encoding and Latent Space Learning}  
+The conditional autoencoder processes structural response time series data conditioned on geometric and material parameters to learn a compact latent representation:
+
+\begin{equation}
+z = \text{Encoder}(u(x,t), [L, E, \rho, \text{notch\_params}])
+\end{equation}
+
+where $u(x,t)$ represents the structural response field, and the conditioning vector incorporates beam length $L$, elastic modulus $E$, density $\rho$, and notch geometric parameters.
+
+\textbf{Stage 2: Parameter-to-Latent Mapping}  
+XGBoost establishes the mapping from parameter space to latent space representations:
+
+\begin{equation}
+\hat{z} = \text{XGBoost}([L, E, \rho, \text{notch\_params}])
+\end{equation}
+
+This two-stage approach enables efficient prediction of structural responses for new parameter combinations by first predicting the latent representation using XGBoost, then decoding the response using the pre-trained conditional autoencoder decoder.
+
+---
+
+\subsubsection*{Loss Function Formulation for Conditional Learning}
+
+The training of conditional autoencoders for structural applications requires carefully designed loss functions that balance reconstruction accuracy with physical consistency. The total loss function typically incorporates multiple components:
+
+\begin{equation}
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{reconstruction}} + \beta \mathcal{L}_{\text{regularization}} + \gamma \mathcal{L}_{\text{physics}}
+\end{equation}
+
+The reconstruction loss ensures accurate response reproduction:
+
+\begin{equation}
+\mathcal{L}_{\text{reconstruction}} = \|\hat{x} - x\|_2^2
+\end{equation}
+
+Regularization terms control latent space organization and prevent overfitting:
+
+\begin{equation}
+\mathcal{L}_{\text{regularization}} = \text{KL}(q_{\phi}(z|x,c) \; || \; p(z))
+\end{equation}
+
+Physics-informed loss terms can be incorporated to ensure structural consistency:
+
+\begin{equation}
+\mathcal{L}_{\text{physics}} = 
+\lambda_1 \|\nabla_x \hat{x} - \nabla_x x\|_2^2 
++ \lambda_2 \Big\| \frac{\partial \hat{x}}{\partial t} - \frac{\partial x}{\partial t} \Big\|_2^2
+\end{equation}
+
+This multi-component loss function ensures that the learned representations maintain both mathematical accuracy and physical plausibility, which is crucial for reliable structural response prediction in engineering applications.
+
+The conditional autoencoder framework provides several advantages for structural engineering applications: parameter-aware feature learning that adapts to different geometric configurations, controlled generation capabilities for exploring design spaces, and dimensionality reduction that preserves essential structural response characteristics while enabling efficient subsequent processing by XGBoost algorithms.
+
+The combination of XGBoost parameter mapping with conditional autoencoder response representation creates a powerful multi-fidelity framework capable of bridging different levels of model complexity while maintaining computational efficiency and predictive accuracy essential for practical structural engineering applications.
+
+\section{Inverse Problem Theory and Formulation}
+\label{sec:inverse_theory}
+
+\subsection{Mathematical Foundation of Inverse Problems}
+
+Inverse problems constitute a fundamental class of mathematical challenges where the objective is to determine causal factors or model parameters from observed effects or measurements. The general framework for inverse problems in structural engineering involves determining unknown system parameters $\mathbf{m} \in \mathcal{M}$ from observed data $\mathbf{d} \in \mathcal{D}$, where $\mathcal{M}$ and $\mathcal{D}$ represent the parameter space and data space respectively.
+
+The relationship between parameters and observations is established through a forward operator $\mathcal{F}: \mathcal{M} \rightarrow \mathcal{D}$:
+
+\begin{equation}
+\mathbf{d} = \mathcal{F}(\mathbf{m}) + \mathbf{n}
+\end{equation}
+
+where $\mathbf{n}$ represents measurement noise or modeling errors. The inverse problem seeks to recover $\mathbf{m}$ from knowledge of $\mathbf{d}$ and $\mathcal{F}$, effectively requiring inversion of the forward operator.
+
+\subsubsection{Hadamard Well-Posedness Conditions}
+
+A problem is considered well-posed in the sense of Hadamard if three fundamental conditions are satisfied:
+
+\begin{enumerate}
+\item \textbf{Existence}: For every observation $\mathbf{d} \in \mathcal{D}$, there exists at least one solution $\mathbf{m} \in \mathcal{M}$ such that $\mathbf{d} = \mathcal{F}(\mathbf{m})$
+\item \textbf{Uniqueness}: The solution is unique, meaning $\mathcal{F}(\mathbf{m}_1) = \mathcal{F}(\mathbf{m}_2)$ implies $\mathbf{m}_1 = \mathbf{m}_2$
+\item \textbf{Stability}: The solution depends continuously on the data, such that small perturbations in observations lead to small changes in recovered parameters
+\end{enumerate}
+
+Mathematically, stability requires that the inverse operator $\mathcal{F}^{-1}$ is continuous. Most inverse problems in structural engineering violate the stability condition, rendering them ill-posed. The instability manifests as extreme sensitivity to measurement noise, where infinitesimal perturbations in observed data can produce arbitrarily large variations in estimated parameters.
+
+\subsection{Ill-Posed Problems and Regularization}
+
+The ill-posed nature of inverse problems necessitates regularization techniques to obtain meaningful solutions. Tikhonov regularization represents the most widely adopted approach, reformulating the inverse problem as a constrained optimization:
+
+\begin{equation}
+\mathbf{m}_{\alpha}^* = \underset{\mathbf{m} \in \mathcal{M}}{\text{argmin}} \left\{ \|\mathcal{F}(\mathbf{m}) - \mathbf{d}\|_{\mathcal{D}}^2 + \alpha \|\mathbf{L}(\mathbf{m} - \mathbf{m}_0)\|_{\mathcal{M}}^2 \right\}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $\alpha > 0$ is the regularization parameter controlling the trade-off between data fidelity and solution regularity
+\item $\mathbf{L}$ is a regularization operator (often identity or differential operator)
+\item $\mathbf{m}_0$ represents prior knowledge or initial estimate of parameters
+\item $\|\cdot\|_{\mathcal{D}}$ and $\|\cdot\|_{\mathcal{M}}$ denote appropriate norms in data and parameter spaces
+\end{itemize}
+
+The first term ensures data fidelity by minimizing misfit between predicted and observed responses, while the second term imposes smoothness or other desirable properties on the solution. The regularization parameter $\alpha$ must be carefully selected—excessive regularization over-smooths the solution and loses important features, while insufficient regularization fails to suppress instabilities.
+
+For linear forward operators where $\mathcal{F}(\mathbf{m}) = \mathbf{A}\mathbf{m}$, the Tikhonov solution admits closed form:
+
+\begin{equation}
+\mathbf{m}_{\alpha}^* = (\mathbf{A}^T\mathbf{A} + \alpha \mathbf{L}^T\mathbf{L})^{-1}(\mathbf{A}^T\mathbf{d} + \alpha \mathbf{L}^T\mathbf{L}\mathbf{m}_0)
+\end{equation}
+
+\subsection{Objective Function Formulation for Parameter Identification}
+
+Inverse problems are typically cast as optimization problems where parameter identification is achieved through minimization of an objective function quantifying discrepancy between observed and predicted responses. The general objective function structure is:
+
+\begin{equation}
+J(\mathbf{m}) = \frac{1}{2}\|\mathbf{d}_{\text{obs}} - \mathcal{F}(\mathbf{m})\|_W^2 + R(\mathbf{m})
+\end{equation}
+
+where:
+\begin{itemize}
+\item $\mathbf{d}_{\text{obs}}$ represents observed measurement data
+\item $\mathcal{F}(\mathbf{m})$ denotes predicted responses from the forward model
+\item $\|\cdot\|_W$ is a weighted norm with weighting matrix $\mathbf{W}$
+\item $R(\mathbf{m})$ represents regularization or prior information terms
+\end{itemize}
+
+The weighted least-squares formulation explicitly accounts for measurement uncertainties:
+
+\begin{equation}
+J(\mathbf{m}) = \frac{1}{2}(\mathbf{d}_{\text{obs}} - \mathcal{F}(\mathbf{m}))^T \mathbf{W} (\mathbf{d}_{\text{obs}} - \mathcal{F}(\mathbf{m})) + R(\mathbf{m})
+\end{equation}
+
+where the weighting matrix $\mathbf{W}$ is often chosen as the inverse of the measurement covariance matrix $\mathbf{C}_d$: $\mathbf{W} = \mathbf{C}_d^{-1}$, providing statistically optimal estimates when measurement errors are Gaussian.
+
+For structural damage identification, the parameter vector typically contains geometric characteristics:
+
+\begin{equation}
+\mathbf{m} = [x_{\text{notch}}, \; d_{\text{notch}}, \; w_{\text{notch}}]^T
+\end{equation}
+
+representing notch location, depth, and width respectively. The forward operator $\mathcal{F}(\mathbf{m})$ maps these parameters to structural responses at sensor locations, which can be efficiently approximated using surrogate models.
+
+\subsection{Differential Evolution Optimization Algorithm}
+
+Differential evolution (DE) represents a powerful evolutionary optimization algorithm particularly suited for inverse problems characterized by non-convex, multi-modal objective landscapes. The algorithm maintains a population of $N_p$ candidate solutions $\{\mathbf{m}_i^{(g)}\}_{i=1}^{N_p}$ at generation $g$, iteratively improving the population through mutation, crossover, and selection operations.
+
+\subsubsection{Population Initialization}
+
+The initial population at generation $g=0$ is established either through random sampling within parameter bounds:
+
+\begin{equation}
+m_{i,j}^{(0)} = m_{j,\text{min}} + \text{rand}(0,1) \cdot (m_{j,\text{max}} - m_{j,\text{min}})
+\end{equation}
+
+for $i = 1,\ldots,N_p$ and $j = 1,\ldots,D$ where $D$ is the parameter dimension, or through strategic initialization informed by prior knowledge of high-confidence parameter regions.
+
+\subsubsection{Mutation Operation}
+
+For each target vector $\mathbf{m}_i^{(g)}$, a mutant vector $\mathbf{v}_i^{(g)}$ is generated through differential mutation. The classic DE/rand/1 strategy constructs the mutant as:
+
+\begin{equation}
+\mathbf{v}_i^{(g)} = \mathbf{m}_{r_1}^{(g)} + F \cdot (\mathbf{m}_{r_2}^{(g)} - \mathbf{m}_{r_3}^{(g)})
+\end{equation}
+
+where $r_1, r_2, r_3 \in \{1,\ldots,N_p\}$ are mutually distinct random indices different from $i$, and $F \in [0,2]$ is the scaling factor controlling mutation amplification. Alternative strategies include DE/best/1 using the best population member:
+
+\begin{equation}
+\mathbf{v}_i^{(g)} = \mathbf{m}_{\text{best}}^{(g)} + F \cdot (\mathbf{m}_{r_1}^{(g)} - \mathbf{m}_{r_2}^{(g)})
+\end{equation}
+
+and DE/current-to-best/1 incorporating directional information:
+
+\begin{equation}
+\mathbf{v}_i^{(g)} = \mathbf{m}_i^{(g)} + F \cdot (\mathbf{m}_{\text{best}}^{(g)} - \mathbf{m}_i^{(g)}) + F \cdot (\mathbf{m}_{r_1}^{(g)} - \mathbf{m}_{r_2}^{(g)})
+\end{equation}
+
+\subsubsection{Crossover Operation}
+
+The crossover operation generates trial vectors $\mathbf{u}_i^{(g)}$ by combining target and mutant vectors, promoting population diversity. Binomial crossover is most common:
+
+\begin{equation}
+u_{i,j}^{(g)} = \begin{cases}
+v_{i,j}^{(g)} & \text{if } \text{rand}_{i,j}(0,1) \leq CR \text{ or } j = j_{\text{rand}} \\
+m_{i,j}^{(g)} & \text{otherwise}
+\end{cases}
+\end{equation}
+
+where $CR \in [0,1]$ is the crossover probability and $j_{\text{rand}} \in \{1,\ldots,D\}$ ensures at least one parameter inherits from the mutant vector.
+
+\subsubsection{Selection Operation}
+
+Selection employs a greedy strategy, comparing trial vector fitness with the target vector:
+
+\begin{equation}
+\mathbf{m}_i^{(g+1)} = \begin{cases}
+\mathbf{u}_i^{(g)} & \text{if } J(\mathbf{u}_i^{(g)}) \leq J(\mathbf{m}_i^{(g)}) \\
+\mathbf{m}_i^{(g)} & \text{otherwise}
+\end{cases}
+\end{equation}
+
+This ensures monotonic improvement of the population's best fitness across generations. The algorithm terminates when convergence criteria are satisfied, such as:
+
+\begin{equation}
+\frac{J(\mathbf{m}_{\text{best}}^{(g)}) - J(\mathbf{m}_{\text{best}}^{(g+1)})}{J(\mathbf{m}_{\text{best}}^{(g)})} < \epsilon_{\text{tol}}
+\end{equation}
+
+or maximum generation limit is reached.
+
+\subsection{Surrogate-Assisted Inverse Analysis}
+
+Traditional inverse analysis requires repeated evaluations of the forward operator $\mathcal{F}(\mathbf{m})$ during optimization, which becomes computationally prohibitive when $\mathcal{F}$ involves expensive finite element simulations. Surrogate models $\mathcal{S}(\mathbf{m})$ trained to approximate $\mathcal{F}(\mathbf{m})$ provide a computationally efficient alternative:
+
+\begin{equation}
+\mathcal{F}(\mathbf{m}) \approx \mathcal{S}(\mathbf{m})
+\end{equation}
+
+enabling rapid objective function evaluation:
+
+\begin{equation}
+J_{\text{surr}}(\mathbf{m}) = \frac{1}{2}\|\mathbf{d}_{\text{obs}} - \mathcal{S}(\mathbf{m})\|_W^2 + R(\mathbf{m})
+\end{equation}
+
+Multi-fidelity surrogate models that integrate low-fidelity and high-fidelity data sources offer enhanced accuracy with minimal high-fidelity training samples. The surrogate approximation introduces additional uncertainty that must be considered when interpreting inverse analysis results, particularly regarding solution confidence intervals and parameter identifiability.
+
+The convergence of differential evolution optimization with surrogate-assisted forward evaluations transforms computationally intractable inverse problems into real-time parameter identification frameworks essential for autonomous structural health monitoring applications.
+
+
+% Chapter 4: Dataset Development
+\chapter{Dataset Development and Setup}
+
+\section{System Configuration and Experimental Setup}
+
+The dataset development process centers on a comprehensive beam-notch-sensor system designed to capture structural wave propagation responses under various damage configurations across two distinct fidelity levels. The fundamental system consists of a slender aluminum beam structure with precisely controlled rectangular notch geometries and strategically positioned sensor arrays for response measurement.
+
+The primary structural element comprises a homogeneous aluminum beam with standardized dimensional characteristics. The beam maintains a fixed length $L = 2.0$ meters, representing a configuration commonly encountered in structural engineering applications where length-to-thickness ratios exceed practical limits for classical beam theory assumptions. The beam cross-sectional geometry incorporates a rectangular profile with width $b = 1.0$ meter and height $h = 0.0015$ meters, yielding a slenderness ratio of approximately $1333$ that satisfies the fundamental assumptions underlying both one-dimensional zigzag theory and two-dimensional finite element formulations.
+
+Material properties reflect typical aluminum alloy characteristics with baseline density $\rho = 2700 \,\text{kg/m}^3$ and elastic modulus $E = 7.0 \times 10^{10}$ Pa. These properties correspond to commonly used structural aluminum grades and provide representative wave propagation characteristics for ultrasonic frequency ranges. The Poisson's ratio maintains the standard value $\nu = 0.33$ for isotropic aluminum behavior, enabling consistent constitutive modeling across both theoretical frameworks.
+
+The rectangular notch configuration represents the primary damage feature under investigation. Notch geometries incorporate three fundamental parameters that completely define the discontinuity characteristics. The notch position parameter $x_{\text{notch}}$ specifies the longitudinal coordinate of the notch center, while notch depth $d_{\text{notch}}$ and notch width $w_{\text{notch}}$ define the geometric extent of material removal. The notch extends from the top surface downward, creating a rectangular cavity that disrupts the structural continuity and generates wave scattering phenomena essential for damage detection methodologies.
+
+Notch positioning spans the central region of the beam structure, with center coordinates ranging from $x_{\text{notch}} = 0.6545$ meters to $x_{\text{notch}} = 0.8355$ meters. This positioning strategy ensures sufficient separation from boundary effects while maintaining adequate sensor coverage for response measurement. The notch depth parameter varies systematically from $d_{\text{notch}} = 0.0001$ meters to $d_{\text{notch}} = 0.001$ meters, corresponding to depth-to-height ratios ranging from approximately $6.7\%$ to $66.7\%$ of the total beam thickness. Notch width variations extend from $w_{\text{notch}} = 0.0001$ meters to $w_{\text{notch}} = 0.0012$ meters, encompassing narrow crack-like defects to more substantial geometric discontinuities.
+
+The sensor array configuration incorporates ten strategically positioned measurement points distributed along the beam length to capture wave propagation and scattering effects. Sensor locations are positioned at coordinates
+\[
+x_{\text{sensor}} = [0.85, 0.87, 0.9, 0.92, 0.95, 0.97, 1.0, 1.02, 1.05, 1.1] \, \text{meters},
+\]
+providing comprehensive coverage of the post-notch region where scattered wave phenomena exhibit maximum sensitivity to damage parameters. This sensor distribution enables detailed characterization of wave transmission, reflection, and mode conversion effects that constitute the fundamental basis for damage detection and quantification methodologies.
+
+Each sensor measures the axial displacement response $u(x_{\text{sensor}}, z, t)$ at a fixed through-thickness coordinate $z = 0.00075$ meters, corresponding to the mid-plane location. This measurement strategy captures the primary wave propagation modes while avoiding complications associated with surface effects and boundary layer phenomena. The temporal response duration extends to $300$ microseconds with sampling rates sufficient to resolve wave propagation characteristics across the frequency range of interest.
+
+\section{Low-Fidelity Dataset Generation Methodology}
+
+The low-fidelity dataset generation employs one-dimensional zigzag beam theory implementations to create extensive training and validation datasets with computational efficiency advantages over high-fidelity approaches. Latin Hypercube Sampling (LHS) serves as the primary sampling strategy, providing superior space-filling properties compared to traditional random sampling approaches while ensuring comprehensive parameter space coverage.
+
+The LHS implementation generates samples across three-dimensional parameter spaces encompassing notch location, depth, and width characteristics. Training dataset generation utilizes $600$ primary damage configurations sampled from the specified parameter bounds, representing a substantial increase over high-fidelity dataset sizes to compensate for the reduced model complexity. Testing dataset configurations include $100$ primary damage cases, maintaining appropriate proportions for robust model validation while ensuring computational tractability.
+
+Material property variations introduce controlled complexity through systematic perturbations of baseline aluminum characteristics. The majority of configurations (approximately $80\%$) utilize nominal material properties with minor variations ($\pm 0.5\%$) to represent manufacturing tolerances and measurement uncertainties. The remaining configurations incorporate broader material property ranges, with density variations spanning $2650$--$2750$ kg/m$^3$ and elastic modulus variations ranging from $6.8 \times 10^{10}$ to $7.2 \times 10^{10}$ Pa.
+
+Pristine beam configurations without notch damage comprise approximately $15\%$ of each dataset, providing baseline responses essential for damage detection algorithm development. These configurations maintain identical material and geometric properties while setting notch parameters to zero, enabling direct comparison between damaged and undamaged structural responses.
+
+The complete low-fidelity dataset encompasses $600$ primary damage training cases supplemented by material property variants and pristine configurations, yielding approximately $650$--$670$ total training samples. Testing datasets maintain similar proportions with $100$ primary damage cases and corresponding variants, resulting in approximately $110$--$120$ testing samples. The total low-fidelity dataset comprises approximately $760$--$790$ simulation cases.
+
+\section{High-Fidelity Dataset Generation Methodology}
+
+The high-fidelity dataset generation process employs two-dimensional finite element method implementations to establish reference solutions with exceptional accuracy for comparative analysis and surrogate model validation. The reduced dataset size reflects the substantial computational requirements associated with full two-dimensional elasticity solutions while maintaining adequate statistical representation for model training purposes.
+
+Training dataset generation utilizes $100$ carefully selected damage configurations sampled through LHS methodology, ensuring optimal parameter space coverage despite the constrained sample size. Testing dataset configurations include $50$ primary damage cases, providing sufficient validation data while managing computational resource allocation effectively. The parameter bounds remain identical to low-fidelity implementations, ensuring direct comparability between modeling approaches.
+
+Material property variations follow identical protocols to low-fidelity datasets, with $80\%$ of configurations utilizing nominal properties with minor variations and $20\%$ incorporating broader material property ranges. Pristine configurations maintain the same $15\%$ proportion, providing essential baseline comparisons across both fidelity levels.
+
+The complete high-fidelity dataset encompasses $100$ primary damage training cases supplemented by material variants and pristine configurations, yielding approximately $110$--$115$ total training samples. Testing datasets include $50$ primary damage cases with variants, resulting in approximately $55$--$60$ testing samples. The total high-fidelity dataset comprises approximately $165$--$175$ simulation cases.
+
+\section{Computational Performance Analysis}
+
+The computational requirements for dataset generation reveal substantial differences between low-fidelity and high-fidelity modeling approaches, directly impacting the feasibility of extensive parameter studies and real-time applications. Individual simulation times demonstrate the fundamental trade-off between model complexity and computational efficiency.
+
+Low-fidelity simulations utilizing one-dimensional zigzag beam theory require approximately $25$--$30$ seconds per case on standard computational hardware. This efficiency stems from the reduced degrees of freedom inherent in one-dimensional formulations and the elimination of complex two-dimensional mesh generation and assembly procedures. The total computational time for the complete low-fidelity dataset of approximately $775$ cases amounts to approximately $21,300$ seconds, equivalent to $5.9$ hours of continuous computation.
+
+High-fidelity simulations employing two-dimensional finite element methods require substantially greater computational resources, with individual cases requiring approximately $1100$--$1200$ seconds ($18.3$--$20.0$ minutes) per simulation. This increase reflects the computational complexity associated with two-dimensional mesh generation, matrix assembly for larger degree-of-freedom systems, and iterative solution procedures for the resulting linear systems. The total computational time for the complete high-fidelity dataset of approximately $170$ cases amounts to approximately $195,500$ seconds, equivalent to $54.3$ hours of continuous computation.
+
+The computational efficiency comparison reveals that one-dimensional zigzag implementations execute approximately $42$ times faster than equivalent two-dimensional finite element solutions while generating datasets nearly five times larger. This performance differential demonstrates the fundamental advantage of reduced-order modeling approaches for extensive parameter studies and highlights the motivation for multi-fidelity surrogate modeling strategies that leverage both computational efficiency and solution accuracy.
+
+\section{Dataset Validation and Quality Assurance}
+
+Dataset validation procedures ensure comprehensive parameter coverage adequacy and eliminate potential overlap between training and testing configurations across both fidelity levels. Systematic verification confirms that no identical parameter combinations appear across dataset boundaries, maintaining strict separation necessary for unbiased model evaluation and preventing data leakage that could compromise surrogate model performance assessment.
+
+Statistical analysis of parameter distributions confirms adequate coverage across all specified ranges with minimal clustering or void regions that could compromise model training effectiveness. Quality assurance protocols incorporate comprehensive verification of geometric validity, material property consistency, and numerical solution convergence for all generated configurations across both fidelity levels.
+
+Each configuration undergoes preliminary analysis to verify physically reasonable responses and eliminate potential numerical artifacts that could compromise dataset integrity. This validation process ensures that all dataset entries represent valid structural configurations capable of supporting meaningful wave propagation analysis while maintaining consistency between low-fidelity and high-fidelity implementations for subsequent comparative studies.
+
+
+
+
+% Chapter 5: Methodology
+\chapter{Training and Evaluation Methodology}
+\label{chap:methodology}
+
+\section{Experimental Setup}
+% Hardware, software, environment details
+
+\section{Model Architecture Design}
+
+
+\subsection{Autoencoder Implementation}
+
+
+\subsection{U-Net Implementation}
+
+
+\subsection{XGBoost Configuration}
+
+
+\section{Training Protocol}
+
+
+
+\subsection{Loss Functions}
+
+
+\subsection{Optimization Strategy}
+
+
+\subsection{Regularization Techniques}
+
+
+\section{Evaluation Methodology}
+
+
+\subsection{Performance Metrics}
+
+
+\subsection{Cross-Validation Strategy}
+
+
+\subsection{Baseline Comparisons}
+
+
+% Chapter 6: Inverse Problem Solution
+\chapter{Inverse Problem Solution for Notch Parameter Identification}
+\label{chap:inverse_new}
+
+\section{Problem Formulation}
+\label{sec:inverse_formulation_new}
+
+\section{Optimization Strategy}
+
+\subsection{Differential Evolution Algorithm}
+
+\subsection{Strategic Population Initialization}
+
+\subsection{Search Space Management}
+
+\section{MFSM as Forward Solver}
+
+
+% Chapter 7: Results and Comparisons
+\chapter{Results and Comparisons}
+\label{chap:results}
+
+\section{Surrogate Model Performance}
+
+
+
+
+\subsection{Autoencoder Results}
+
+
+\subsection{U-Net Results}
+
+
+\subsection{XGBoost Results}
+
+
+
+
+
+
+\subsection{Accuracy Comparison}
+
+
+\subsection{Computational Efficiency}
+
+
+\subsection{Robustness Analysis}
+
+
+\section{Inverse Problem Results}
+
+\subsection{Parameter Recovery Analysis}
+
+\subsection{Optimization Convergence}
+
+
+\section{Ablation Studies}
+
+
+\section{Error Analysis}
+
+
+% Chapter 8: Conclusions and Future Work
+\chapter{Conclusions and Future Scope}
+\label{chap:conclusions}
+
+\section{Summary of Contributions}
+
+
+\section{Key Findings}
+
+
+\section{Limitations}
+
+
+\section{Future Research Directions}
+
+
+\subsection{Short-term Extensions}
+
+
+\subsection{Long-term Research Opportunities}
+
+
+\section{Potential Applications}
+
+
+% Bibliography
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+
+
+\appendix
+
+
+\end{document}

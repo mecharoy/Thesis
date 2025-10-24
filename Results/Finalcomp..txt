@@ -1,0 +1,11 @@
+MFSM: 	Time Series R² (Full): 0.9713
+	Time Series MSE (Full): 0.001553
+	Time Series NMSE (Full): 2.6150%
+
+HFSM: 	Time Series R² (Full): 0.8781
+	Time Series MSE (Full): 0.006599
+	Time Series NMSE (Full): 11.1492%
+
+LFSM: 	Time Series R² (Full): 0.8324
+	Time Series MSE (Full): 0.00905
+	Time Series NMSE (Full): 16.74 %

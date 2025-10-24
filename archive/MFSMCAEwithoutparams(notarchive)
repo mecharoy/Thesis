@@ -1,0 +1,662 @@
+#!/usr/bin/env python3
+# Revised MFSM CAE training script with fixes requested by user.
+# Changes: fixed Hilbert region, normalized region weights, normalized weighted loss,
+# correct AMP usage, FINETUNE LR + scheduler, response normalization, safer saves.
+
+import os
+import time
+import logging
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader, ConcatDataset
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import r2_score, mean_squared_error
+
+from scipy.signal import hilbert, find_peaks
+import matplotlib.pyplot as plt
+
+# ---------------- CONFIG ----------------
+CONFIG = {
+    'DEVICE': 'cuda' if torch.cuda.is_available() else 'cpu',
+
+    # Files
+    'PRETRAIN_TRAIN_FILE': '/home/user2/Music/abhi3/parameters/LFSM2000train.csv',
+    'PRETRAIN_VAL_FILE': '/home/user2/Music/abhi3/parameters/LFSM2000test.csv',
+    'TRAIN_FILE': '/home/user2/Music/abhi3/LFSM/lfsm_interleaved_2d_train.csv',
+    'TEST_FILE': '/home/user2/Music/abhi3/LFSM/lfsm_interleaved_2d_test.csv',
+    'OUTPUT_DIR': '/home/user2/Music/abhi3/MFSM/MFSMCAE',
+
+    # Data
+    'NUM_TIME_STEPS': 1500,
+    'VAL_SPLIT_RATIO': 0.2,
+    'TRAIN_NUM_PAIRS': 330,    
+    # Model
+    'LATENT_DIM': 64,
+    'PRETRAIN_EPOCHS': 100,
+    'FINETUNE_EPOCHS': 200,
+    'EPOCHS': 200,
+    'BATCH_SIZE': 32,
+    'LEARNING_RATE': 1e-4,
+    'FINETUNE_LR': 1e-5,
+    'WEIGHT_DECAY': 1e-5,
+    'EARLY_STOPPING_PATIENCE': 30,
+
+    'DROPOUT': 0.15,
+    'CLIP_GRAD_NORM': 1.0,
+    'USE_AMP': True,
+
+    'FINETUNE_LOSS_WEIGHT': 3.0,  
+    'USE_HILBERT_WEIGHTING': True,
+    'REGION_WEIGHT': 1.0,
+}
+
+# ---------------- Logging ----------------
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+os.makedirs(CONFIG['OUTPUT_DIR'], exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] - %(message)s',
+    handlers=[
+        logging.FileHandler(os.path.join(CONFIG['OUTPUT_DIR'], f'cae_training_{timestamp}.log')),
+        logging.StreamHandler()
+    ]
+)
+
+if torch.cuda.is_available():
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    torch.backends.cudnn.benchmark = True
+    logging.info("Enabled TF32 and cuDNN benchmark for CUDA")
+
+device = CONFIG['DEVICE']
+
+# ---------------- Utilities ----------------
+
+def compute_hilbert_envelope_and_region(time_series, region_weight=10.0):
+    """
+    Robust Hilbert envelope region finder. Returns normalized region_weights with mean=1.
+    """
+    ts = np.asarray(time_series, dtype=float)
+    if ts.size == 0:
+        L = CONFIG['NUM_TIME_STEPS']
+        return np.zeros(L), (0, L-1), np.ones(L, dtype=bool), np.ones(L, dtype=float)
+
+    analytic = hilbert(ts)
+    envelope = np.abs(analytic)
+
+    max_env = envelope.max() if envelope.size else 0.0
+    prominence_threshold = max(0.05 * max_env, 0.01)
+
+    peaks, _ = find_peaks(envelope, prominence=prominence_threshold, distance=50)
+    if len(peaks) == 0:
+        peaks = np.array([len(ts)//4, 3*len(ts)//4])
+    elif len(peaks) == 1:
+        p = peaks[0]
+        peaks = np.array([max(0, p-250), min(len(ts)-1, p+250)])
+
+    peaks = np.sort(peaks)
+    left_peak_idx = int(peaks[0])
+    right_peak_idx = int(peaks[-1])
+
+    # Left threshold: move left from left_peak until envelope < 0.3*peak
+    left_threshold = 0.3 * envelope[left_peak_idx]
+    x_idx = left_peak_idx
+    while x_idx > 0 and envelope[x_idx] > left_threshold:
+        x_idx -= 1
+    x_idx = max(0, x_idx)
+
+    # Right threshold: move right from right_peak until envelope < 0.3*peak
+    right_threshold = 0.3 * envelope[right_peak_idx]
+    y_idx = right_peak_idx
+    while y_idx < len(ts) - 1 and envelope[y_idx] > right_threshold:
+        y_idx += 1
+    y_idx = min(len(ts)-1, y_idx)
+
+    # Ensure ordering and fallback widening if needed
+    if x_idx >= y_idx:
+        x_idx = max(0, left_peak_idx - 50)
+        y_idx = min(len(ts)-1, right_peak_idx + 50)
+        if x_idx >= y_idx:
+            x_idx = max(0, left_peak_idx - 20)
+            y_idx = min(len(ts)-1, left_peak_idx + 20)
+
+    region_mask = np.zeros(len(ts), dtype=bool)
+    region_mask[x_idx:y_idx+1] = True
+
+    weights = np.ones(len(ts), dtype=float)
+    weights[region_mask] = float(region_weight)
+
+    # Normalize weights to mean=1 to avoid scaling loss magnitude
+    weights = weights / (np.mean(weights) + 1e-12)
+
+    return envelope, (left_peak_idx, right_peak_idx), region_mask, weights
+
+# ---------------- Datasets ----------------
+
+class LFSMPretrainDataset(Dataset):
+    def __init__(self, df, resp_scaler=None, p_scaler=None, is_training=True):
+        param_cols = ['notch_x', 'notch_depth', 'notch_width', 'length', 'density', 'youngs_modulus', 'response_point']
+        time_cols = [col for col in df.columns if col.startswith('t_')]
+        time_cols = sorted(time_cols, key=lambda x: int(x.split('_')[1]))[:CONFIG['NUM_TIME_STEPS']]
+
+        self.params = df[param_cols].values.astype(np.float32)
+        self.responses = df[time_cols].values.astype(np.float32)
+
+        # Response scaler
+        if resp_scaler is None and is_training:
+            self.resp_scaler = StandardScaler()
+            self.responses_scaled = self.resp_scaler.fit_transform(self.responses)
+        else:
+            self.resp_scaler = resp_scaler
+            self.responses_scaled = self.resp_scaler.transform(self.responses) if self.resp_scaler is not None else self.responses
+
+        
+        self.inputs = self.responses_scaled + np.random.normal(0, 2e-3, self.responses_scaled.shape).astype(np.float32)
+        self.targets = self.responses_scaled.astype(np.float32)
+
+        # Region weights: disable Hilbert weighting for pretraining (uniform weights)
+        self.region_weights = [np.ones(CONFIG['NUM_TIME_STEPS'], dtype=np.float32) for _ in range(len(self.targets))]
+
+        # Params scaling
+        if p_scaler is None and is_training:
+            self.p_scaler = StandardScaler()
+            self.params_scaled = self.p_scaler.fit_transform(self.params)
+        else:
+            self.p_scaler = p_scaler
+            self.params_scaled = self.p_scaler.transform(self.params) if self.p_scaler is not None else self.params
+
+        self.params_scaled = np.ascontiguousarray(self.params_scaled.astype(np.float32))
+        logging.info(f"Pre-training dataset: {len(self.targets)} samples. Resp range (original): [{self.responses.min():.6f},{self.responses.max():.6f}]")
+
+    def __len__(self):
+        return len(self.targets)
+
+    def __getitem__(self, idx):
+        return {
+            'params': torch.tensor(self.params_scaled[idx], dtype=torch.float32),
+            'input': torch.tensor(self.inputs[idx], dtype=torch.float32),
+            'target': torch.tensor(self.targets[idx], dtype=torch.float32),
+            'input_raw': self.inputs[idx],
+            'target_raw': self.targets[idx],
+            'params_raw': self.params[idx],
+            'region_weights': torch.tensor(self.region_weights[idx], dtype=torch.float32),
+        }
+
+class ResponsePairDataset(Dataset):
+    def __init__(self, df, resp_scaler=None, p_scaler=None, is_training=True):
+        param_cols = ['notch_x', 'notch_depth', 'notch_width', 'length', 'density', 'youngs_modulus', 'location']
+        time_cols = [col for col in df.columns if col.startswith('t_')]
+        time_cols = sorted(time_cols, key=lambda x: int(x.split('_')[1]))[:CONFIG['NUM_TIME_STEPS']]
+
+        params = df[param_cols].values.astype(np.float32)
+        responses = df[time_cols].values.astype(np.float32)
+
+        ground_truth = responses[::2]
+        lfsm_predictions = responses[1::2]
+        params_pairs = params[::2]
+
+        min_pairs = min(len(ground_truth), len(lfsm_predictions), len(params_pairs))
+        self.ground_truth = ground_truth[:min_pairs]
+        self.lfsm_predictions = lfsm_predictions[:min_pairs]
+        self.params = params_pairs[:min_pairs]
+
+        # Response scaler
+        if resp_scaler is None and is_training:
+            self.resp_scaler = StandardScaler()
+            self.ground_scaled = self.resp_scaler.fit_transform(self.ground_truth)
+            self.lfsm_scaled = self.resp_scaler.transform(self.lfsm_predictions)
+        else:
+            self.resp_scaler = resp_scaler
+            self.ground_scaled = self.resp_scaler.transform(self.ground_truth) if self.resp_scaler is not None else self.ground_truth
+            self.lfsm_scaled = self.resp_scaler.transform(self.lfsm_predictions) if self.resp_scaler is not None else self.lfsm_predictions
+
+        # region weights computed on original ground truth
+        if CONFIG.get('USE_HILBERT_WEIGHTING', False):
+            self.region_weights = []
+            region_weight = CONFIG.get('REGION_WEIGHT', 10.0)
+            for i, sample in enumerate(self.ground_truth):
+                _, _, _, w = compute_hilbert_envelope_and_region(sample, region_weight)
+                w = w / (np.mean(w) + 1e-12)
+                self.region_weights.append(w.astype(np.float32))
+        else:
+            self.region_weights = [np.ones(CONFIG['NUM_TIME_STEPS'], dtype=np.float32) for _ in range(len(self.ground_truth))]
+
+        # Params scale
+        if p_scaler is None and is_training:
+            self.p_scaler = StandardScaler()
+            self.params_scaled = self.p_scaler.fit_transform(self.params)
+        else:
+            self.p_scaler = p_scaler
+            self.params_scaled = self.p_scaler.transform(self.params) if self.p_scaler is not None else self.params
+
+        self.params_scaled = np.ascontiguousarray(self.params_scaled.astype(np.float32))
+        logging.info(f"ResponsePairDataset: {len(self.ground_truth)} pairs. Ground truth orig range: [{self.ground_truth.min():.6f},{self.ground_truth.max():.6f}]")
+
+    def __len__(self):
+        return len(self.ground_truth)
+
+    def __getitem__(self, idx):
+        return {
+            'params': torch.tensor(self.params_scaled[idx], dtype=torch.float32),
+            'input': torch.tensor(self.lfsm_scaled[idx], dtype=torch.float32),
+            'target': torch.tensor(self.ground_scaled[idx], dtype=torch.float32),
+            'input_raw': self.lfsm_scaled[idx],
+            'target_raw': self.ground_scaled[idx],
+            'params_raw': self.params[idx],
+            'region_weights': torch.tensor(self.region_weights[idx], dtype=torch.float32),
+        }
+
+# ---------------- Model (same architecture) ----------------
+
+class Encoder(nn.Module):
+    def __init__(self, timeseries_dim, params_dim, latent_dim):
+        super().__init__()
+        # Remove parameter injection - process only time series
+        self.network = nn.Sequential(
+            nn.Linear(timeseries_dim, 1024),
+            nn.BatchNorm1d(1024),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(CONFIG['DROPOUT']),
+            nn.Linear(1024, 512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(CONFIG['DROPOUT']),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
+            nn.Linear(256, latent_dim)
+        )
+
+    def forward(self, x, c=None):
+        return self.network(x)
+
+class Decoder(nn.Module):
+    def __init__(self, latent_dim, params_dim, output_dim):
+        super().__init__()
+        # Remove parameter injection - process only latent vector
+        self.network = nn.Sequential(
+            nn.Linear(latent_dim, 512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
+            nn.Linear(512, 1024),
+            nn.BatchNorm1d(1024),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
+            nn.Linear(1024, output_dim)
+        )
+
+    def forward(self, z, c=None):
+        return self.network(z)
+
+class ConditionalAutoencoder(nn.Module):
+    def __init__(self, timeseries_dim, params_dim, latent_dim):
+        super().__init__()
+        self.encoder = Encoder(timeseries_dim, params_dim, latent_dim)
+        self.decoder = Decoder(latent_dim, params_dim, timeseries_dim)
+
+    def forward(self, x, c=None):
+        z = self.encoder(x, c)
+        recon = self.decoder(z, c)
+        return recon, z
+
+    def apply_xavier_init(self):
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+
+# ---------------- Loss (fixed) ----------------
+
+def create_weighted_loss(use_hilbert=True):
+    mse_none = nn.MSELoss(reduction='none')
+    if not use_hilbert:
+        def loss_fn(pred, tgt, region_weights=None):
+            return mse_none(pred, tgt).mean()
+        return loss_fn
+
+    def weighted_loss(pred, tgt, region_weights):
+        # pred, tgt: (B,T); region_weights: (B,T)
+        se = (pred - tgt) ** 2  # (B,T)
+        rw = region_weights.to(pred.device).float()  # (B,T)
+        # Normalize each sample's region weights to mean=1
+        rw = rw / (rw.mean(dim=1, keepdim=True) + 1e-12)
+        weighted_se = se * rw
+        overall = se.mean()
+        region_term = weighted_se.mean()
+        total = 0.7 * overall + 0.3 * region_term
+        return total
+
+    return weighted_loss
+
+# ---------------- Data loading and split ----------------
+
+def load_and_split_data():
+    logging.info("=== LOADING INTERLEAVED DATA WITH NOTCH FILTERING ===")
+    df_train = pd.read_csv(CONFIG['TRAIN_FILE'])
+    df_test = pd.read_csv(CONFIG['TEST_FILE'])
+
+    if df_train.isnull().values.any():
+        df_train = df_train.dropna().reset_index(drop=True)
+        logging.warning("Dropped NaNs from training data")
+
+    if df_test.isnull().values.any():
+        df_test = df_test.dropna().reset_index(drop=True)
+        logging.warning("Dropped NaNs from test data")
+
+    # Remove no-notch cases from test data (cases with notch_depth=0 AND notch_width=0)
+    no_notch_mask = (df_test['notch_depth'] == 0.0) & (df_test['notch_width'] == 0.0)
+    no_notch_count = no_notch_mask.sum()
+    
+    if no_notch_count > 0:
+        df_test = df_test[~no_notch_mask]
+        logging.info(f"Removed {no_notch_count} no-notch cases from test dataset")
+        logging.info(f"Test dataset size after removal: {len(df_test)} rows")
+    
+    # Use all test data without notch severity filtering
+    original_test_count = len(df_test)
+    logging.info(f"Using all test data without notch severity filtering")
+    logging.info(f"Test dataset size: {original_test_count} rows")
+
+    num_train_pairs = len(df_train) // 2
+    desired_pairs = min(CONFIG['TRAIN_NUM_PAIRS'], num_train_pairs)
+    rng = np.random.RandomState(42)
+    pair_indices = rng.choice(np.arange(num_train_pairs), size=desired_pairs, replace=False)
+
+    def pair_rows(pair_indices):
+        rows = []
+        for pi in pair_indices:
+            start = int(pi) * 2
+            rows.extend([start, start + 1])
+        return rows
+
+    train_rows = pair_rows(pair_indices)
+    df_train_sub = df_train.iloc[train_rows].reset_index(drop=True)
+    logging.info(f"Sampling {desired_pairs} training pairs out of {num_train_pairs} available pairs")
+
+    # create train dataset to get scaler/p_scaler
+    train_dataset = ResponsePairDataset(df_train_sub, resp_scaler=None, p_scaler=None, is_training=True)
+
+    # validation/test split from df_test
+    num_test_pairs = len(df_test) // 2
+    val_pairs = int(num_test_pairs * CONFIG['VAL_SPLIT_RATIO'])
+    rng = np.random.RandomState(42)
+    all_idx = np.arange(num_test_pairs)
+    val_pair_indices = rng.choice(all_idx, size=val_pairs, replace=False)
+    test_pair_indices = np.setdiff1d(all_idx, val_pair_indices)
+
+    val_rows = pair_rows(val_pair_indices)
+    test_rows = pair_rows(test_pair_indices)
+
+    val_df = df_test.iloc[val_rows].reset_index(drop=True)
+    test_df = df_test.iloc[test_rows].reset_index(drop=True)
+
+    val_dataset = ResponsePairDataset(val_df, resp_scaler=train_dataset.resp_scaler, p_scaler=train_dataset.p_scaler, is_training=False)
+    test_dataset = ResponsePairDataset(test_df, resp_scaler=train_dataset.resp_scaler, p_scaler=train_dataset.p_scaler, is_training=False)
+
+    logging.info(f"Data split - Train (pairs): {len(train_dataset)}, Val (pairs): {len(val_dataset)}, Test (pairs): {len(test_dataset)}")
+    return train_dataset, val_dataset, test_dataset
+
+# ---------------- Training & Eval ----------------
+
+def calculate_nmse(y_true, y_pred):
+    nmse_values = []
+    for i in range(len(y_true)):
+        true = y_true[i]
+        pred = y_pred[i]
+        sigma = np.std(true)
+        if sigma > 0:
+            nmse_values.append(np.mean(((true - pred) / sigma) ** 2))
+    return np.mean(nmse_values) * 100 if nmse_values else np.inf
+
+def train_model(model, train_loader, val_loader, device, lr, loss_weight=1.0, stage_name="Training", use_amp=True):
+    logging.info(f"=== STARTING {stage_name.upper()} ON {device} (Loss Weight: {loss_weight}, LR: {lr}) ===")
+    model.to(device)
+
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=CONFIG['WEIGHT_DECAY'])
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, verbose=True)
+
+    criterion = create_weighted_loss(use_hilbert=CONFIG.get('USE_HILBERT_WEIGHTING', False))
+
+    scaler = torch.cuda.amp.GradScaler(enabled=(use_amp and device == 'cuda'))
+
+    best_val_loss = float('inf')
+    best_model_path = os.path.join(CONFIG['OUTPUT_DIR'], f'best_cae_{stage_name.replace(" ", "_")}_{timestamp}.pth')
+    patience_counter = 0
+    min_delta = 1e-6
+
+    train_losses = []
+    val_losses = []
+
+    for epoch in range(CONFIG['EPOCHS']):
+        model.train()
+        running_loss = 0.0
+        n_batches = 0
+        for batch in train_loader:
+            inputs = batch['input'].to(device)
+            targets = batch['target'].to(device)
+            params = batch['params'].to(device)
+            region_weights = batch['region_weights'].to(device)
+
+            optimizer.zero_grad()
+            with torch.cuda.amp.autocast(enabled=(use_amp and device == 'cuda')):
+                outputs, _ = model(inputs)
+                loss = loss_weight * criterion(outputs, targets, region_weights)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), CONFIG['CLIP_GRAD_NORM'])
+            scaler.step(optimizer)
+            scaler.update()
+
+            running_loss += loss.item()
+            n_batches += 1
+
+        avg_train_loss = running_loss / (n_batches + 1e-12)
+        train_losses.append(avg_train_loss)
+
+        # Validation
+        model.eval()
+        v_loss = 0.0
+        v_batches = 0
+        with torch.no_grad():
+            for batch in val_loader:
+                inputs = batch['input'].to(device)
+                targets = batch['target'].to(device)
+                params = batch['params'].to(device)
+                region_weights = batch['region_weights'].to(device)
+                outputs, _ = model(inputs)
+                loss = loss_weight * criterion(outputs, targets, region_weights)
+                v_loss += loss.item()
+                v_batches += 1
+
+        avg_val_loss = v_loss / (v_batches + 1e-12)
+        val_losses.append(avg_val_loss)
+        scheduler.step(avg_val_loss)
+
+        # Early stopping / save best
+        if avg_val_loss < best_val_loss - min_delta:
+            best_val_loss = avg_val_loss
+            torch.save(model.state_dict(), best_model_path)
+            patience_counter = 0
+            logging.info(f"New best model saved at epoch {epoch+1} with val loss {best_val_loss:.8f}")
+        else:
+            patience_counter += 1
+            if patience_counter >= CONFIG['EARLY_STOPPING_PATIENCE']:
+                logging.info(f"Early stopping at epoch {epoch+1}. No improvement for {patience_counter} epochs.")
+                break
+
+        if (epoch + 1) % 10 == 0 or epoch == 0:
+            logging.info(f"Epoch [{epoch+1}/{CONFIG['EPOCHS']}] Train: {avg_train_loss:.8f} Val: {avg_val_loss:.8f} Patience: {patience_counter}/{CONFIG['EARLY_STOPPING_PATIENCE']}")
+
+    # load best
+    if os.path.exists(best_model_path):
+        model.load_state_dict(torch.load(best_model_path, map_location=device))
+        logging.info(f"Loaded best model from {best_model_path}")
+    else:
+        logging.warning("No best model file found; returning last model state.")
+
+    return model, train_losses, val_losses, best_model_path
+
+def evaluate_model(model, dataloader, device, resp_scaler, dataset_name="Test"):
+    logging.info(f"=== EVALUATING ON {dataset_name.upper()} DATA ===")
+    model.eval()
+    model.to(device)
+
+    all_targets = []
+    all_preds = []
+    all_inputs = []
+
+    with torch.no_grad():
+        for batch in dataloader:
+            inputs = batch['input'].to(device)
+            params = batch['params'].to(device)
+            outputs, _ = model(inputs, params)
+            all_preds.append(outputs.cpu().numpy())
+            all_inputs.append(batch['input'].numpy())
+            all_targets.append(batch['target'].numpy())
+
+    all_preds = np.vstack(all_preds)
+    all_targets = np.vstack(all_targets)
+    all_inputs = np.vstack(all_inputs)
+
+    # inverse transform (responses were scaled)
+    if resp_scaler is not None:
+        all_preds_orig = resp_scaler.inverse_transform(all_preds)
+        all_targets_orig = resp_scaler.inverse_transform(all_targets)
+        all_inputs_orig = resp_scaler.inverse_transform(all_inputs)
+    else:
+        all_preds_orig = all_preds
+        all_targets_orig = all_targets
+        all_inputs_orig = all_inputs
+
+    mse = mean_squared_error(all_targets_orig.flatten(), all_preds_orig.flatten())
+    r2 = r2_score(all_targets_orig.flatten(), all_preds_orig.flatten())
+    nmse = calculate_nmse(all_targets_orig, all_preds_orig)
+
+    # per-sample r2
+    r2_scores = []
+    for i in range(len(all_targets_orig)):
+        try:
+            r2_scores.append(r2_score(all_targets_orig[i], all_preds_orig[i]))
+        except:
+            r2_scores.append(-np.inf)
+    r2_scores = np.array(r2_scores)
+
+    logging.info(f"{dataset_name} Results: MSE {mse:.8f}, R2 {r2:.6f}, NMSE {nmse:.4f}%")
+    return {
+        'mse': mse,
+        'r2_overall': r2,
+        'r2_per_sample': r2_scores,
+        'nmse': nmse,
+        'targets': all_targets_orig,
+        'predictions': all_preds_orig,
+        'inputs': all_inputs_orig
+    }
+
+# ---------------- Visualization & Save ----------------
+
+def create_visualizations(test_results, train_losses, val_losses):
+    logging.info("Saving training/eval plots")
+    plt.figure(figsize=(10,5))
+    plt.plot(train_losses, label='train')
+    plt.plot(val_losses, label='val')
+    plt.yscale('log')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(CONFIG['OUTPUT_DIR'], f'losses_{timestamp}.png'), dpi=200)
+    plt.close()
+
+def save_results(test_results, model_path, resp_scaler):
+    np.savez(os.path.join(CONFIG['OUTPUT_DIR'], f'cae_results_{timestamp}.npz'),
+             ground_truth=test_results['targets'],
+             predictions=test_results['predictions'],
+             lfsm_inputs=test_results['inputs'],
+             r2_per_sample=test_results['r2_per_sample'])
+
+    with open(os.path.join(CONFIG['OUTPUT_DIR'], f'cae_config_{timestamp}.json'), 'w') as f:
+        import json
+        json.dump(CONFIG, f, indent=2)
+
+    # Save scaler
+    import joblib
+    joblib.dump(resp_scaler, os.path.join(CONFIG['OUTPUT_DIR'], f'resp_scaler_{timestamp}.pkl'))
+    logging.info("Saved results, model, and scalers.")
+
+# ---------------- Main ----------------
+
+def main():
+    logging.info("=== TWO-STAGE CONDITIONAL AUTOENCODER TRAINING (REVISED) ===")
+    logging.info(f"Device: {device}")
+
+    # STAGE 1: PRETRAIN
+    logging.info("STAGE 1: PRETRAIN ON 1D LFSM")
+    pretrain_train_df = pd.read_csv(CONFIG['PRETRAIN_TRAIN_FILE'])
+    pretrain_val_df = pd.read_csv(CONFIG['PRETRAIN_VAL_FILE'])
+    logging.info(f"Pretrain train samples: {len(pretrain_train_df)}, val samples: {len(pretrain_val_df)}")
+
+    pretrain_train_dataset = LFSMPretrainDataset(pretrain_train_df, resp_scaler=None, p_scaler=None, is_training=True)
+    pretrain_val_dataset = LFSMPretrainDataset(pretrain_val_df, resp_scaler=pretrain_train_dataset.resp_scaler, p_scaler=pretrain_train_dataset.p_scaler, is_training=False)
+
+    pretrain_train_loader = DataLoader(pretrain_train_dataset, batch_size=CONFIG['BATCH_SIZE'], shuffle=True, num_workers=2, pin_memory=True)
+    pretrain_val_loader = DataLoader(pretrain_val_dataset, batch_size=CONFIG['BATCH_SIZE'], shuffle=False, num_workers=2, pin_memory=True)
+
+    # Model
+    params_dim = 7
+    model = ConditionalAutoencoder(timeseries_dim=CONFIG['NUM_TIME_STEPS'], params_dim=params_dim, latent_dim=CONFIG['LATENT_DIM'])
+    model.apply_xavier_init()
+    logging.info(f"Model params: {sum(p.numel() for p in model.parameters()):,}")
+
+    # Pretrain
+    old_epochs = CONFIG['EPOCHS']
+    CONFIG['EPOCHS'] = CONFIG['PRETRAIN_EPOCHS']
+    model, pretrain_losses, pretrain_val_losses, pretrain_model_path = train_model(
+        model, pretrain_train_loader, pretrain_val_loader, device,
+        lr=CONFIG['LEARNING_RATE'], loss_weight=1.0, stage_name="Pretrain", use_amp=CONFIG['USE_AMP']
+    )
+    CONFIG['EPOCHS'] = old_epochs
+    logging.info(f"Pretrain done. Model at {pretrain_model_path}")
+
+    # STAGE 2: FINE-TUNE
+    logging.info("STAGE 2: FINE-TUNE ON 2D DATA")
+    train_dataset, val_dataset, test_dataset = load_and_split_data()
+
+    train_loader = DataLoader(train_dataset, batch_size=CONFIG['BATCH_SIZE'], shuffle=True, num_workers=2, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=CONFIG['BATCH_SIZE'], shuffle=False, num_workers=2, pin_memory=True)
+    test_loader = DataLoader(test_dataset, batch_size=CONFIG['BATCH_SIZE'], shuffle=False, num_workers=2, pin_memory=True)
+
+    CONFIG['EPOCHS'] = CONFIG['FINETUNE_EPOCHS']
+    model, finetune_losses, finetune_val_losses, finetune_model_path = train_model(
+        model, train_loader, val_loader, device,
+        lr=CONFIG['FINETUNE_LR'], loss_weight=CONFIG['FINETUNE_LOSS_WEIGHT'], stage_name="Finetune", use_amp=CONFIG['USE_AMP']
+    )
+    logging.info(f"Finetune done. Model at {finetune_model_path}")
+
+    # EVAL (combine validation with test for final evaluation)
+    combined_eval_dataset = ConcatDataset([val_dataset, test_dataset])
+    combined_eval_loader = DataLoader(combined_eval_dataset, batch_size=CONFIG['BATCH_SIZE'], shuffle=False, num_workers=2, pin_memory=True)
+    test_results = evaluate_model(model, combined_eval_loader, device, resp_scaler=train_dataset.resp_scaler, dataset_name="Test")
+
+    # Save and visualize
+    all_train_losses = pretrain_losses + finetune_losses
+    all_val_losses = pretrain_val_losses + finetune_val_losses
+    create_visualizations(test_results, all_train_losses, all_val_losses)
+    save_results(test_results, finetune_model_path, train_dataset.resp_scaler)
+
+    logging.info("=== TRAINING COMPLETE ===")
+    finite_mask = np.isfinite(test_results['r2_per_sample'])
+    mean_r2_per_sample = float(np.mean(test_results['r2_per_sample'][finite_mask])) if np.any(finite_mask) else float('nan')
+    logging.info(f"Final Test R2: {test_results['r2_overall']:.6f}, Mean per-sample R2: {mean_r2_per_sample:.6f}, MSE: {test_results['mse']:.8f}, NMSE: {test_results['nmse']:.4f}%")
+
+if __name__ == '__main__':
+    main()

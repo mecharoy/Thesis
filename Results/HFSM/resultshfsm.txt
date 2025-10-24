@@ -1,0 +1,19 @@
+============================================================
+2025-10-15 18:58:43,816 [INFO] - PHASE 4: EVALUATION ON TEST DATA
+2025-10-15 18:58:43,816 [INFO] - ============================================================
+2025-10-15 18:58:43,816 [INFO] - --- Evaluating on HFSM_Test data ---
+2025-10-15 18:58:43,822 [INFO] - Extracting latent vectors using the trained encoder.
+2025-10-15 18:58:45,170 [INFO] - HFSM_Test Evaluation Results:
+2025-10-15 18:58:45,170 [INFO] -   Latent Space R²: 0.9916
+2025-10-15 18:58:45,170 [INFO] -   === FULL METRICS (inflated by zeros/baseline) ===
+2025-10-15 18:58:45,170 [INFO] -   Time Series R² (Full): 0.8781
+2025-10-15 18:58:45,170 [INFO] -   Time Series MSE (Full): 0.006599
+2025-10-15 18:58:45,170 [INFO] -   Time Series NMSE (Full): 11.1492%
+2025-10-15 18:58:45,170 [INFO] -   === ROI METRICS (dynamic regions only - TRUE PERFORMANCE) ===
+2025-10-15 18:58:45,170 [INFO] -   Time Series R² (ROI): 0.8923 ← PRIMARY METRIC
+2025-10-15 18:58:45,170 [INFO] -   Time Series NMSE (ROI): 10.7700%
+2025-10-15 18:58:45,170 [INFO] -   ROI R² range: [0.3381, 0.9859]
+2025-10-15 18:58:45,170 [INFO] - 
+============================================================
+2025-10-15 18:58:45,170 [INFO] - PHASE 5: GENERATING OUTPUTS AND VISUALIZATIONS
+2025-10-15 18:58:45,170 [INFO] - ============================================================

@@ -1,0 +1,262 @@
+# Nomenclature and Abbreviations
+
+This section consolidates all the nomenclature, symbols, and abbreviations used throughout the thesis, expanded with the additional definitions requested.
+
+---
+
+## Roman Letters
+
+**Dimensional Parameters**
+- $a_0^{(k)}, a_1^{(k)}, a_2^{(k)}, a_3^{(k)}$ - Coefficients of zigzag function for layer $k$
+- $b$ - Beam width
+- $c_{\max}$ - Maximum wave speed in material
+- $\mathbf{c}$ - Conditioning parameters vector
+- $d(\cdot, \cdot)$ - Distance metric function
+- $E^{(k)}$ - Elastic modulus of layer $k$
+- $f_{\max}$ - Maximum frequency of interest
+- $f_k(\mathbf{x})$ - Individual tree functions in XGBoost ensemble
+- $G^{(k)}$ - Shear modulus of layer $k$
+- $g_i, h_i$ - First and second-order gradients in XGBoost
+- $h$ - Total beam height
+- $h^{(k)}$ - Thickness of layer $k$
+- $H_1, H_2, H_3, H_4$ - Cubic Hermite shape functions
+- $I_{11}, I_{12}, I_{13}, I_{22}, I_{23}, I_{33}$ - Inertia coefficients
+- $J^{(k)}$ - Jacobian transformation factor for layer $k$
+- $L$ - Physical beam length
+- $L_{\text{PML}}$ - Thickness of PML region
+- $l_e$ - Element length
+- $MSE$ - Mean Squared Error
+- $N$ - Total number of layers
+- $N_1, N_2$ - Linear Lagrange shape functions
+- $\mathbf{N}(\xi)$ - Shape function matrix in natural coordinates
+- $n_{\text{abs}}$ - Dimensionless absorption parameter
+- $n_{\lambda}$ - Number of wavelengths in PML thickness
+- $R^2$ - Coefficient of determination
+- $RMSE$ - Root Mean Squared Error
+- $T$ - Number of leaves in decision tree
+- $w_j$ - Weight of leaf $j$ in decision tree
+- $\hat{\mathbf{x}}$ - Reconstructed output from decoder
+- $\mathbf{z}$ - Latent space representation
+
+**Force and Stress Resultants**
+- $\mathbf{F}(t)$ - External force vector
+- $M$ - Bending moment resultant
+- $N$ - Axial force resultant
+- $P$ - Zigzag stress resultant
+- $Q$ - Shear force resultant
+
+**Material Properties**
+- $A_{11}, A_{22}, A_{33}, A_{44}, A_{55}, A_{56}$ - Stiffness coefficients
+- $\mathbf{B}^{(k)}$ - Strain-displacement matrix for layer $k$
+- $\mathbf{C}_{\text{PML}}$ - PML damping matrix
+- $\mathbf{D}^{(k)}$ - Material constitutive matrix for layer $k$
+- $\mathbf{D}_{\theta}$ - Decoder function parameterized by $\theta$
+- $\mathbf{E}_{\phi}$ - Encoder function parameterized by $\phi$
+- $\mathbf{K}^e$ - Element stiffness matrix
+- $\mathbf{M}^e$ - Element mass matrix
+
+**Displacement and Kinematic Variables**
+- $R^{(k)}(z)$ - Zigzag function for layer $k$
+- $u(x,z,t)$ - Axial displacement field
+- $u_0(x,t)$ - Axial displacement of reference plane
+- $w(x,z,t)$ - Transverse displacement field
+- $w_0(x,t)$ - Transverse displacement of reference plane
+- $\mathbf{q}_i$ - Nodal degrees of freedom vector at node $i$
+- $\mathbf{q}^e$ - Element displacement vector
+- $\mathbf{Q}$ - Global displacement vector
+
+**Coordinates and Geometric Parameters**
+- $x$ - Longitudinal coordinate
+- $x_{\text{PML}}$ - Coordinate where PML region begins
+- $\tilde{x}$ - Complex coordinate in PML formulation
+- $z$ - Through-thickness coordinate
+- $z_k$ - Through-thickness coordinate at interface of layer $k$
+- $z_0, z_N$ - Bottom and top surfaces of beam
+- $\xi$ - Natural coordinate in finite element
+- $\eta$ - Second natural coordinate
+
+**Machine Learning and Computational Terms**
+- $\mathcal{F}$ - Functional space of all possible trees
+- $\mathcal{L}(\theta, \phi)$ - Loss function for autoencoder training
+- $\mu_{X}$ - Input data distribution
+- $\Omega(f_k)$ - Regularization term for tree complexity
+
+---
+
+## Greek Letters
+
+**Material and Physical Properties**
+- $\alpha_i$ - Attention coefficients in U-Net architecture
+- $\beta$ - Newmark-$\beta$ time integration parameter
+- $\beta, \gamma, \lambda$ - Regularization parameters (context-dependent)
+- $\gamma$ - Newmark-$\gamma$ time integration parameter
+- $\gamma_{xz}$ - Transverse shear strain
+- $\varepsilon_x$ - Axial strain
+- $\epsilon$ - Training tolerance/convergence criteria
+- $\eta$ - Second natural coordinate in finite elements
+- $\lambda_{\min}$ - Minimum wavelength of interest
+- $\mu$ - Learning rate in optimization
+- $\nu^{(k)}$ - Poisson's ratio of layer $k$
+- $\rho^{(k)}$ - Density of layer $k$
+- $\sigma_x^{(k)}$ - Axial stress in layer $k$
+- $\sigma(\cdot)$ - Activation function
+- $\sigma(x)$ - Absorption coefficient function
+- $\sigma_{\max}$ - Maximum absorption coefficient
+- $\tau_{xz}^{(k)}$ - Transverse shear stress in layer $k$
+- $\phi, \theta$ - Neural network parameters (encoder/decoder)
+- $\psi_0(x,t)$ - Zigzag amplitude function
+- $\omega$ - Angular frequency
+
+**Mathematical Operators and Functions**
+- $\theta_i$ - Rotation of transverse normal at node $i$
+- $\mathcal{L}$ - Lagrangian function
+- $\delta$ - Variational operator
+- $\partial$ - Partial derivative operator
+- $\nabla$ - Gradient operator
+- $\xi$ - Natural coordinate in finite element formulation
+
+---
+
+## Subscripts and Superscripts
+
+**Layer and Element Identification**
+- $(k)$ - Layer number designation
+- $e$ - Element designation
+- $i, j$ - Node numbers or indices
+- $\text{PML}$ - Pertaining to Perfectly Matched Layer
+- $\text{reconstruction}$ - Related to reconstruction loss
+- $\text{regularization}$ - Related to regularization loss
+- $\text{physics}$ - Related to physics-informed loss
+- $\text{multi-scale}$ - Related to multi-scale loss
+- $\text{total}$ - Related to total combined loss
+
+**Directional and Component Designations**
+- $x$ - Axial direction component
+- $z$ - Through-thickness direction component
+- $xz$ - Shear component between $x$ and $z$ directions
+- $0$ - Reference plane value
+- $\max$ - Maximum value
+- $\min$ - Minimum value
+
+**Physical Behavior Classifications**
+- $u$ - Axial displacement related
+- $w$ - Transverse displacement related
+- $\psi$ - Zigzag amplitude related
+- $\varepsilon$ - Strain related
+- $\gamma$ - Shear strain related
+
+---
+
+## Matrix and Vector Notation
+
+**System Matrices**
+- $\mathbf{M}$ - Global mass matrix
+- $\mathbf{C}$ - Global damping matrix
+- $\mathbf{K}$ - Global stiffness matrix
+- $\mathbf{N}(\xi)$ - Shape function matrix
+- $\mathbf{B}_{\varepsilon}^{(k)}, \mathbf{B}_{\gamma}^{(k)}$ - Strain-displacement submatrices
+- $\mathbf{W}_g, \mathbf{W}_x$ - Weight matrices for attention mechanism
+- $\mathbf{b}_g$ - Bias vector for attention gate
+
+**Vector Quantities**
+- $\mathbf{u}(x,z,t)$ - Displacement vector field
+- $\mathbf{q}^e$ - Element displacement vector
+- $\dot{\mathbf{Q}}, \ddot{\mathbf{Q}}$ - Global velocity and acceleration vectors
+
+**Energy and Variational Terms**
+- $T$ - Kinetic energy
+- $T^e$ - Element kinetic energy
+- $U$ - Strain energy
+
+**Machine Learning Operations**
+- $\otimes$ - Kronecker product
+- $\odot$ - Element-wise multiplication (Hadamard product)
+- $\text{concat}(\cdot, \cdot)$ - Concatenation operation
+- $\mathcal{D}_i$ - Decoder operation at level $i$
+- $\mathcal{E}_i$ - Encoder operation at level $i$
+- $\mathcal{P}_i(\boldsymbol{\theta})$ - Parameter projection function
+
+**Loss Function Terms**
+- $\mathcal{L}_{\text{reconstruction}}$ - Reconstruction loss
+- $\mathcal{L}_{\text{regularization}}$ - Regularization loss
+- $\mathcal{L}_{\text{physics}}$ - Physics-informed loss
+- $\mathcal{L}_{\text{multi-scale}}$ - Multi-scale loss function
+- $\mathcal{L}_{\text{total}}$ - Total combined loss
+
+---
+
+## Abbreviations and Acronyms
+
+**Theoretical Methods**
+- PML - Perfectly Matched Layer
+- FEM - Finite Element Method
+- ROM - Reduced Order Model
+- POD - Proper Orthogonal Decomposition
+- SVD - Singular Value Decomposition
+
+**Machine Learning and Computational Methods**
+- MFSM - Multi-Fidelity Surrogate Model
+- LFSM - Low-Fidelity Surrogate Model  
+- HFSM - High-Fidelity Surrogate Model
+- CAE - Conditional Autoencoder
+- CNN - Convolutional Neural Network
+- DNN - Deep Neural Network
+- XGB - XGBoost (Extreme Gradient Boosting)
+- GPR - Gaussian Process Regression
+- HF - High-Fidelity
+- LF - Low-Fidelity
+- MF - Multi-Fidelity
+- MIDAS - Mechanics-Informed Damage Assessment of Structures
+- LSTM - Long Short-Term Memory
+- CART - Classification and Regression Trees
+- KL - Kullback-Leibler (divergence)
+
+**Computing and Hardware**
+- GPU - Graphics Processing Unit
+- CPU - Central Processing Unit
+- CUDA - Compute Unified Device Architecture
+- CSR - Compressed Sparse Row (matrix format)
+
+**Mathematical Concepts**
+- DOF - Degrees of Freedom
+- BC - Boundary Conditions
+- IC - Initial Conditions
+- DOE - Design of Experiments
+
+**Structural Health Monitoring**
+- SHM - Structural Health Monitoring
+
+---
+
+## Special Symbols and Operators
+
+**Integration and Summation**
+- $\int$ - Integration operator
+- $\sum$ - Summation operator
+- $\frac{\partial}{\partial x}, \frac{\partial}{\partial z}, \frac{\partial}{\partial t}$ - Partial derivative operators
+- $\frac{d}{dx}, \frac{d}{dt}$ - Total derivative operators
+
+**Statistical and Probabilistic Operators**
+- $\mathbb{E}[\cdot]$ - Expected value operator
+- $\text{KL}(q \| p)$ - Kullback-Leibler divergence
+- $\mathcal{N}(\mu, \sigma^2)$ - Normal distribution
+
+**Norms and Distance Measures**
+- $\|\cdot\|_2$ - L2 norm (Euclidean norm)
+- $\|\cdot\|_1$ - L1 norm (Manhattan norm)
+
+**Matrix Operations**
+- $^T$ - Matrix transpose
+- $^{-1}$ - Matrix inverse
+- $\otimes$ - Tensor product (when applicable)
+
+**Time Derivatives**
+- $\dot{()}$ - First time derivative
+- $\ddot{()}$ - Second time derivative
+- $()_{,x}$ - Partial derivative with respect to $x$
+- $()_{,z}$ - Partial derivative with respect to $z$
+- $()_{,t}$ - Partial derivative with respect to time
+
+---
+
+This comprehensive nomenclature provides the foundation for understanding the mathematical framework of zigzag beam theory with PML implementation and multi-fidelity surrogate modeling using machine learning architectures, ensuring consistent notation throughout the theoretical development and finite element formulation.
