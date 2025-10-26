@@ -1,186 +1,170 @@
-# CLAUDE.md - Research Project Configuration
+# CLAUDE.md
 
-## PROJECT OVERVIEW
-**Research Focus**: Comparative Analysis of 1D Zigzag Theory vs 2D FEM for Notched Beam Analysis with Deep Learning Integration
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-### Core Research Objectives
+## Repository Overview
 
-**Objective 1a**: Development of 1D Zigzag Theory Model for Homogeneous Beam with Rectangular Notch
-- Implementation of zigzag displacement field theory for homogeneous material systems
-- Incorporation of rectangular notch geometry within 1D analytical framework
-- Validation of non-standard application of zigzag theory to single-material beam structures
+This is a computational mechanics research project focused on **Multi-Fidelity Surrogate Modeling (MFSM)** for beam response analysis. The system combines Low-Fidelity Surrogate Models (LFSM) based on 1D zigzag theory with High-Fidelity data from 2D Finite Element Method (FEM) simulations to create efficient predictive models.
 
-**Objective 1b**: Development of 2D Elastic Finite Element Model with Identical Configuration
-- Creation of high-fidelity 2D FEM model matching exact beam and notch specifications
-- Implementation of identical geometric parameters and boundary conditions
-- Establishment of reference solution for comparative analysis
+## Project Architecture
 
-**Objective 2**: Multi-Fidelity Surrogate Model Development through Deep Learning Architecture
-- **Low Fidelity Surrogate Model (LFSM)**: Conditional AutoEncoder training on 1D zigzag responses (750 cases × 11 sensor points)
-- **Latent Space Prediction**: XGBoost implementation for parameter-to-latent space mapping
-- **Response Reconstruction**: Direct parameter-to-response prediction via XGBoost-Decoder pipeline
-- **Multi-Fidelity Enhancement**: LFSM fine-tuning using limited 2D FEM data (50 cases × 11 sensors) to create Multi-Fidelity Surrogate Model (MFSM)
-- **Comparative Validation**: MFSM performance assessment against High Fidelity Surrogate Model (HFSM) trained exclusively on 2D data
+### Core Methodology
+The project implements a sophisticated multi-phase training pipeline:
 
-**Objective 3**: Inverse Problem Solution using MFSM as Forward Solver
-- **Parameter Identification**: Determination of unknown notch parameters (location, depth, width) from measured response data
-- **Optimization Strategy**: Differential evolution algorithm implementation with strategic population initialization
-- **Search Space Management**: 15 individuals initialized within high-confidence regions, 10 at periphery boundaries, 5 in extended parameter space
-- **Training Data Integration**: 2D training dataset utilization for search region refinement and confidence assessment
+1. **Phase 1**: LFSM Pre-training on 1D zigzag theory data
+2. **Phase 2**: XGBoost surrogate training on LFSM latent vectors
+3. **Phase 3**: MFSM fine-tuning on 2D FEM data
+4. **Phase 4**: XGBoost fine-tuning on combined LFSM+HFSM data
 
-**Special Note**: 1D zigzag theory typically applies to composite materials but is being applied to homogeneous beam with notch in this study (non-standard application)
+### Key Components
 
-## CRITICAL CONSTRAINTS & REQUIREMENTS
+**Autoencoder Architecture** (`LFSM-MFSM.py`)
+- Encoder: Compresses 1500-timestep time series into 30-dimensional latent space
+- Decoder: Reconstructs time series from latent representations
+- Uses batch normalization, LeakyReLU activations, and dropout regularization
 
-### Writing Standards
-- **MANDATORY**: Extensive online research for every technical concept, methodology, and related work
-- **NO FABRICATION POLICY**: Never create, assume, or fabricate technical details, research findings, equations, or methodological information
-- **Academic Tone**: Maintain strict formal academic writing throughout
-- **Human-like Writing**: Remove AI-detection patterns while preserving technical accuracy
-- **Comprehensive Coverage**: Provide exhaustive coverage with detailed explanations
-- **Source Verification**: Cross-reference all claims with credible academic sources
+**Surrogate Model**
+- XGBoost regression for parameter-to-latent mapping
+- GPU-accelerated training when available
+- Weighted sample training to emphasize high-fidelity data
 
-### Technical Specifications
-- **1D Zigzag Theory**: Applied to homogeneous notched beam (non-standard application)
-- **2D FEM Modeling**: Standard approach for comparative analysis
-- **Deep Learning**: Architecture selection through research (U-NET candidate)
-- **Crack Parameter Prediction**: Primary deliverable requirement
+**Data Processing Pipeline**
+- Parameter scaling to [-1, 1] range using MinMaxScaler
+- Time series response data (1500 timesteps per sample)
+- Region of Interest (ROI) evaluation for true performance metrics
 
-## FILE STRUCTURE & NAVIGATION
+## Development Commands
 
-### Code Locations
+### Environment Setup
+```bash
+# Activate virtual environment (required for all Python commands)
+source venv/bin/activate
 
-- **All code files** are stored in the `Code/` directory at the repository root. Use this folder as the canonical source for scripts used in data generation, model training, and evaluation.
-- **Code descriptions and documentation** for individual scripts are collected in `Code/codedescription/`. Consult these markdown files before modifying or running any script; they contain usage notes, input/output formats, and expected dependencies.
-- **Main LaTeX file**: The project thesis manuscript is `main.tex` at the repository root. IMPORTANT: Do not edit `main.tex` directly unless explicitly instructed. Instead, add instructions or changes in a separate document and request approval before modifying `main.tex`.
+# Install dependencies (if needed)
+pip install pandas numpy torch scikit-learn xgboost matplotlib joblib
+```
 
-When running or modifying code, prefer to work inside the `Code/` directory and ensure any generated outputs follow the project's Output File Management rules (all outputs must be placed in `Claude_res/`).
+### Running Main Training Pipeline
+```bash
+# Main MFSM training (single-file implementation)
+python playground.py
 
-### Key Reference Files
-- **`/Nomenclature.md/` file**: Contains complete notation and symbol definitions
-  - **INSTRUCTION**: Always consult nomenclature file before using any symbols
-  - **NEW NOMENCLATURE**: If required symbols not present, add them to the file
-  - **CONSISTENCY**: Use only approved nomenclature throughout project
+# Alternative LFSM-MFSM implementation
+python Code/LFSM-MFSM.py
+```
 
-### Document Structure
-- **Synopsis Report**: Follow reference PDF structural format
-- **Chapter-by-Chapter Approach**: Work systematically, request approval before proceeding
-- **Literature Integration**: Incorporate extensive literature review in each section
+### Data Generation and Processing
+```bash
+# Generate 2D FEM datasets
+python Code/dataset2Dgenfinal.py
 
-## RESEARCH & VERIFICATION PROTOCOL
+# Generate zigzag theory datasets
+python Code/datagenzigzag.py
 
-### Mandatory Research Steps
-1. **Web Search**: Conduct thorough online research for all technical concepts
-2. **Source Verification**: Use multiple credible academic sources
-3. **Cross-Reference**: Validate all technical claims
-4. **Gap Identification**: Explicitly state when information is unavailable
-5. **Current State-of-Art**: Include recent developments and findings
+# Run inverse problem examples
+python Code/inverseproblemplayground.py
+```
 
-### Information Handling
-- **Unknown Information**: Request clarification rather than fabricating
-- **Technical Definitions**: Ensure accurate explanation of all terminology
-- **Methodological Details**: Provide comprehensive coverage of approaches
-- **Limitations**: Clearly state research boundaries and constraints
+### Comparison and Analysis
+```bash
+# Compare zigzag vs Timoshenko theories
+python Code/comparison_zigzag_timoshenko.py
 
-## INTERACTION PROTOCOL
+# Pure HFSM modeling
+python Code/HFSM.py
+```
 
-### Communication Guidelines
-- **Research First**: Search extensively before responding
-- **Complete Sections**: Provide full content without leaving user completions
-- **Approval Seeking**: Ask permission before adding supplementary content
-- **Focused Responses**: Address only requested content without unnecessary elaboration
-- **Clarification Requests**: Ask for specific details when information insufficient
+## Data Structure and File Organization
 
-### Content Development Process
-1. **Research Phase**: Extensive literature review and technical verification
-2. **Structure Planning**: Outline section before writing
-3. **Content Creation**: Develop comprehensive, research-backed content
-4. **Review Phase**: Verify academic standards and technical accuracy
-5. **Approval Request**: Seek confirmation before proceeding to next section
+### Input Data Format
+**Parameters** (7 columns): `notch_x`, `notch_depth`, `notch_width`, `length`, `density`, `youngs_modulus`, `location`
+**Responses**: 1500 timestep time series data (`r0` to `r1499` or `r_0` to `r_1499`)
 
-## TECHNICAL WRITING SPECIFICATIONS
+### Key Directories
+- `parameters/`: CSV training and test datasets for both LFSM and HFSM
+- `Code/`: Main Python implementations and documentation
+- `Results/`: Training outputs, model files, and evaluation results
+- `Claude_res/`: Output directory for Claude-generated results (required by user instructions)
+- `Illustration/`: Mathematical explanations and visualizations
 
-### Academic Standards
-- **Formality Level**: Strict academic tone throughout
-- **Technical Precision**: Accurate definition and explanation of all concepts
-- **Literature Integration**: Comprehensive review of current research
-- **Methodological Rigor**: Detailed coverage of analytical approaches
-- **Result Presentation**: Clear, evidence-based findings
+### Configuration
+All model hyperparameters and file paths are centralized in a `CONFIG` dictionary at the top of each main script. Key settings include:
+- GPU/CPU selection and XGBoost GPU acceleration
+- File paths for training/test data
+- Model architecture parameters (latent dimensions, batch sizes, learning rates)
+- Multi-fidelity training weights and sampling strategies
 
-### Content Requirements
-- **Comprehensive Coverage**: Exhaustive treatment of each topic
-- **Technical Depth**: Detailed explanations of complex concepts
-- **Research Integration**: Extensive incorporation of literature findings
-- **Comparative Analysis**: Clear presentation of methodology differences
-- **Predictive Framework**: Detailed coverage of deep learning integration
+## Model Training and Evaluation
 
-## DEEP LEARNING ARCHITECTURE CONSIDERATIONS
+### Training Strategy
+The system uses a sophisticated transfer learning approach:
+1. **Pre-training** on abundant 1D data (LFSM) to learn basic physics
+2. **Fine-tuning** on limited 2D data (HFSM) to capture high-fidelity behavior
+3. **Weighted loss functions** emphasizing high-fidelity data (typically 3x weight)
+4. **Early stopping** based on validation loss with patience mechanisms
 
-### Current Status
-- **Architecture Selection**: Under research and evaluation
-- **Primary Candidates**: U-NET, complex neural networks
-- **Application Focus**: Discrepancy analysis and crack parameter prediction
-- **Research Required**: Extensive literature review for optimal architecture selection
+### Key Evaluation Metrics
+- **ROI R²**: Primary metric focusing on dynamic response regions only
+- **Full R²**: Secondary metric (inflated by quiescent zones)
+- **NMSE**: Normalized Mean Squared Error in percentage
+- **Latent Space R²**: Parameter-to-latent mapping quality
 
-### Implementation Requirements
-- **Comparative Framework**: Integration with 1D/2D analysis results
-- **Predictive Capabilities**: Crack parameter estimation
-- **Validation Protocol**: Comprehensive testing and verification
-- **Performance Metrics**: Accuracy, efficiency, reliability measures
+### Model Persistence
+- Autoencoder models saved as `.pth` files (PyTorch)
+- XGBoost models saved as `.joblib` files
+- Parameter scalers saved for consistent preprocessing
+- Support for loading existing models to skip retraining
 
-## PROJECT DELIVERABLES
+## Important Implementation Notes
 
-### Primary Outputs
-- **Synopsis Report**: Comprehensive research document
-- **Comparative Analysis**: 1D zigzag vs 2D FEM methodology assessment
-- **Deep Learning Framework**: Predictive model for crack parameters
-- **Technical Documentation**: Complete methodological coverage
+### Numerical Stability
+- Uses log-sum-exp and other numerical stability techniques
+- Implements gradient clipping for training stability
+- Handles edge cases in R² calculation and ROI determination
 
-### Quality Standards
-- **Academic Rigor**: Peer-review level quality
-- **Technical Accuracy**: Verified through multiple sources
-- **Comprehensive Coverage**: Complete treatment of all aspects
-- **Original Research**: Novel application of zigzag theory to notched beams
+### Performance Optimization
+- GPU acceleration for both neural networks and XGBoost
+- Efficient data loading with PyTorch DataLoader
+- Vectorized operations using NumPy
+- Memory-efficient handling of large datasets
 
-## DEVELOPMENT GUIDELINES
+### Scientific Best Practices
+- Random seed setting for reproducibility
+- Comprehensive logging of training progress
+- Region-specific evaluation focusing on dynamic response
+- Proper train/validation/test splits with stratification
 
-### Output File Management
-- **CRITICAL**: Always produce files in `Claude_res/` directory and nowhere else
-- **NO EXCEPTIONS**: All outputs, results, analysis files, figures, and generated content MUST go to `Claude_res/`
-- **Directory Creation**: Create `Claude_res/` if it doesn't exist before generating any output
-- **Path Validation**: Verify output path targets `Claude_res/` before writing files
-- **NO UNNECESSARY DOCUMENTATION**: Do not create README, documentation, or explanation files after writing code unless explicitly requested
-- **EDIT, DON'T CREATE**: When improvements are needed, edit existing files rather than creating new versions
+## User Preferences and Guidelines
 
-### Code Development (if required)
-- **Default Language**: Python unless specified otherwise
-- **Analysis Tool**: JavaScript only in analysis environment
-- **Single File Principle**: One cohesive file unless explicitly requested
-- **Validation Protocol**: Mandatory syntax and logic checking
+From the user's CLAUDE.md instructions:
+- **Single-file preference**: Default to single-file implementations unless complexity demands modularization
+- **Educational approach**: Explain code logic clearly as if user is learning
+- **Validation emphasis**: Double-check implementations and provide validation steps
+- **Output directory**: Always produce results in `Claude_res/` directory
+- **Virtual environment**: Use `venv` for running Python codes
+- **Question-asking**: Always ask important questions before making major decisions
 
-### Documentation Standards
-- **Technical Documentation**: Complete coverage of all implementations
-- **Code Comments**: Comprehensive explanation of algorithms
-- **Method Documentation**: Detailed coverage of all approaches
-- **Result Documentation**: Clear presentation of findings
+## Common Workflows
 
-## FINAL REMINDERS
+### Training New Models
+1. Update `CONFIG` dictionary with desired file paths and hyperparameters
+2. Set `USE_EXISTING_MODELS = False` to train from scratch
+3. Run `python playground.py` - training progress will be logged
+4. Models automatically saved to `OUTPUT_DIR` with descriptive names
 
-### Critical Success Factors
-- **OUTPUT LOCATION - MANDATORY**: ALL files MUST be produced in `Claude_res/` directory only
-- **Research Thoroughness**: Extensive online investigation required
-- **Academic Standards**: Maintain strict formal requirements
-- **Technical Accuracy**: Verify all information through credible sources
-- **Human-like Writing**: Remove AI detection patterns
-- **Comprehensive Coverage**: Complete treatment of all topics
+### Using Pre-trained Models
+1. Set `USE_EXISTING_MODELS = True` in configuration
+2. Ensure model files exist in output directory
+3. System will load models and skip training phases
+4. Proceed directly to evaluation and prediction
 
-### Collaboration Protocol
-- **Step-by-Step Approach**: Work systematically through each section
-- **Approval Requirements**: Seek confirmation before major additions
-- **Clarification Protocol**: Request details when information insufficient
-- **Quality Assurance**: Maintain highest academic and technical standards
+### Generating Predictions
+1. Use `predict_timeseries_from_params()` function with trained models
+2. Call `create_comparison_plots()` for comprehensive visualizations
+3. Use `dump_mfsm_interleaved_predictions()` for CSV output format
 
----
-
-**Remember**: This research represents a novel application of 1D zigzag theory to homogeneous notched beams, requiring careful documentation of methodological approaches and comprehensive comparative analysis with standard 2D FEM techniques.
-- No need to make unneccesary documents after you write a code
+### Evaluating Model Performance
+1. Run `evaluate_on_dataset()` for comprehensive metrics
+2. Pay attention to ROI R² (primary performance indicator)
+3. Review individual sample plots for failure analysis
+4. Check training logs for convergence patterns

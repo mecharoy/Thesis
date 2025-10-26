@@ -1,0 +1,20 @@
+TY  - JOUR
+AU  - Muller, Aurelia
+AU  - Robertson-Welsh, Bradley
+AU  - Gaydecki, Patrick
+AU  - Gresil, Matthieu
+AU  - Soutis, Constantinos
+PY  - 2017
+DA  - 2017/04/01
+TI  - Structural Health Monitoring Using Lamb Wave Reflections and Total Focusing Method for Image Reconstruction
+JO  - Applied Composite Materials
+SP  - 553
+EP  - 573
+VL  - 24
+IS  - 2
+AB  - This investigation aimed to adapt the total focusing method (TFM) algorithm (originated from the synthetic aperture focusing technique in digital signal processing) to accommodate a circular array of piezoelectric sensors (PZT) and characterise defects using guided wave signals for the development of a structural health monitoring system. This research presents the initial results of a broader study focusing on the development of a structural health monitoring (SHM) guided wave system for advance carbon fibre reinforced plastic (CFRP) composite materials. The current material investigated was an isotropic (aluminium) square plate with 16 transducers operating successively as emitter or sensor in pitch and catch configuration enabling the collection of 240 signals per assessment. The Lamb wave signals collected were tuned on the symmetric fundamental mode with a wavelength of 17 mm, by setting the excitation frequency to 300 kHz. The initial condition for the imaging system, such as wave speed and transducer position, were determined with post processing of the baseline signals through a method involving the identification of the waves reflected from the free edge of the plate. The imaging algorithm was adapted to accommodate multiple transmitting transducers in random positions. A circular defect of 10 mm in diameter was drilled in the plate, which is similar to the delamination size introduced by a low velocity impact event in a composite plate. Images were obtained by applying the TFM to the baseline signals, Test 1 data (corresponding to the signals obtained after introduction of the defect) and to the data derived from the subtraction of the baseline to the Test 1 signals. The result shows that despite the damage diameter being 40 % smaller than the wavelength, the image (of the subtracted baseline data) demonstrated that the system can locate where the waves were reflected from the defect boundary. In other words, the contour of the damaged area was highlighted enabling its size and position to be determined.
+SN  - 1573-4897
+UR  - https://doi.org/10.1007/s10443-016-9549-5
+DO  - 10.1007/s10443-016-9549-5
+ID  - Muller2017
+ER  - 
