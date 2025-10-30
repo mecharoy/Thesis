@@ -91,10 +91,10 @@ CONFIG = {
     'USE_XGB_GPU': True,
 
     # --- File Paths & Dirs ---
-    'LFSM_TRAIN_FILE': '/home/user2/Music/abhi3/parameters/LFSM2000train.csv',
-    'LFSM_TEST_FILE': '/home/user2/Music/abhi3/parameters/LFSM2000test.csv',
-    'HFSM_TRAIN_FILE': '/home/user2/Music/abhi4/datagen/train_responses.csv',
-    'HFSM_TEST_FILE': '/home/user2/Music/abhi4/datagen/test_responses.csv',
+    'LFSM_TRAIN_FILE': '/home/user2/Music/abhi4/LFSM2000train.csv',
+    'LFSM_TEST_FILE': '/home/user2/Music/abhi4/LFSM2000test.csv',
+    'HFSM_TRAIN_FILE': '/home/user2/Music/abhi4/datagen/train_responsesuniform.csv',
+    'HFSM_TEST_FILE': '/home/user2/Music/abhi4/datagen/test_responsesuniform.csv',
     'OUTPUT_DIR': '/home/user2/Music/abhi4/datagen/MFSM',
 
     # --- Data & Model Hyperparameters ---
@@ -120,7 +120,7 @@ CONFIG = {
     'MFSM_PHASE1_EPOCHS': 50,         # Decoder-only training phase
     'MFSM_PHASE1_LR': 1e-4,           # Learning rate for decoder-only phase
     'MFSM_PHASE2_EPOCHS': 150,        # Full network fine-tuning phase
-    'MFSM_PHASE2_LR': 1e-6,           # Very low learning rate for full network phase  
+    'MFSM_PHASE2_LR': 1e-5,           # Very low learning rate for full network phase  
 
     # --- Model Loading/Training Control ---
     'USE_EXISTING_MODELS': False,  # Set to True to use pre-saved AutoEncoder models, False to train from scratch
@@ -140,7 +140,7 @@ CONFIG = {
     'XGB_PHASE1_COLSAMPLE': 0.8,
     
     # Phase 2 (Fine-tuning) XGBoost Hyperparameters - Optimized for better R²
-    'XGB_PHASE2_N_ESTIMATORS': 5000,      # Increased from 2000 to 5000
+    'XGB_PHASE2_N_ESTIMATORS': 2000,      # Increased from 2000 to 5000
     'XGB_PHASE2_MAX_DEPTH': 10,           # Increased from 10 to 15
     'XGB_PHASE2_ETA': 0.02,               # Decreased from 0.02 to 0.01 for finer learning
     'XGB_PHASE2_SUBSAMPLE': 0.8,          # Increased from 0.8 to 0.9
@@ -1608,6 +1608,649 @@ def create_comparison_plots(ground_truth, predictions, parameters, output_dir, d
         'r2_histogram_path': r2_hist_path
     }
 
+def analyze_parameter_space_performance(X_test, Y_test, Y_pred, output_dir):
+    """
+    Analyze MFSM reconstruction performance across the parameter space.
+
+    This function maps R² scores to parameter combinations to identify
+    regions where the MFSM model struggles with reconstruction.
+
+    Args:
+        X_test: Test parameters (n_samples, n_params)
+        Y_test: Ground truth time series (n_samples, n_timesteps)
+        Y_pred: Predicted time series (n_samples, n_timesteps)
+        output_dir: Directory to save analysis results
+
+    Returns:
+        Dictionary containing performance analysis results
+    """
+    logging.info("--- Analyzing Parameter Space Performance ---")
+
+    from scipy.stats import pearsonr
+    from sklearn.cluster import KMeans
+
+    n_samples = X_test.shape[0]
+    param_names = CONFIG['PARAM_COLS']
+
+    # Extract notch parameters (first 3 columns) and locations
+    notch_x = X_test[:, 0]  # location parameter
+    notch_depth = X_test[:, 1]
+    notch_width = X_test[:, 2]
+    locations = X_test[:, -1]  # location column
+
+    # Calculate ROI R² for each sample (true performance metric)
+    r2_scores_roi = []
+    for i in range(n_samples):
+        location = locations[i]
+        roi_start, roi_end = get_roi_for_location(location)
+
+        true_roi = Y_test[i, roi_start:roi_end]
+        pred_roi = Y_pred[i, roi_start:roi_end]
+
+        if len(true_roi) > 0:
+            r2 = r2_score(true_roi, pred_roi)
+            r2_scores_roi.append(r2)
+        else:
+            r2_scores_roi.append(-np.inf)
+
+    r2_scores_roi = np.array(r2_scores_roi)
+
+    # Filter out invalid R² scores
+    valid_mask = r2_scores_roi > -np.inf
+    notch_x_valid = notch_x[valid_mask]
+    notch_depth_valid = notch_depth[valid_mask]
+    notch_width_valid = notch_width[valid_mask]
+    r2_valid = r2_scores_roi[valid_mask]
+    locations_valid = locations[valid_mask]
+    X_valid = X_test[valid_mask]
+
+    logging.info(f"Valid samples for analysis: {len(r2_valid)}/{n_samples}")
+    logging.info(f"R² range: [{r2_valid.min():.4f}, {r2_valid.max():.4f}]")
+    logging.info(f"Mean R²: {r2_valid.mean():.4f} ± {r2_valid.std():.4f}")
+
+    # Calculate correlations between parameters and performance
+    correlations = {}
+    for i, param_name in enumerate(param_names[:3]):  # Only notch parameters
+        corr, p_value = pearsonr(X_valid[:, i], r2_valid)
+        correlations[param_name] = {'correlation': corr, 'p_value': p_value}
+        logging.info(f"{param_name} vs R² correlation: {corr:.4f} (p={p_value:.4f})")
+
+    # Identify performance quantiles
+    percentiles = [10, 25, 50, 75, 90]
+    r2_percentiles = np.percentile(r2_valid, percentiles)
+    logging.info("R² percentiles:")
+    for p, val in zip(percentiles, r2_percentiles):
+        logging.info(f"  {p}th percentile: {val:.4f}")
+
+    # Identify worst performing samples (bottom 25%)
+    worst_threshold = np.percentile(r2_valid, 25)
+    worst_mask = r2_valid <= worst_threshold
+    worst_params = X_valid[worst_mask]
+    worst_r2 = r2_valid[worst_mask]
+
+    # Cluster worst performing samples to identify problematic regions
+    if len(worst_params) > 5:  # Only cluster if we have enough samples
+        n_clusters = min(3, len(worst_params) // 2)  # Adaptive clustering
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        worst_clusters = kmeans.fit_predict(worst_params[:, :3])  # Only notch parameters
+
+        cluster_centers = kmeans.cluster_centers_
+        logging.info(f"Identified {n_clusters} problematic parameter regions:")
+        for i, center in enumerate(cluster_centers):
+            cluster_samples = np.sum(worst_clusters == i)
+            cluster_r2_mean = worst_r2[worst_clusters == i].mean()
+            logging.info(f"  Region {i+1}: notch_x={center[0]:.4f}, notch_depth={center[1]:.6f}, notch_width={center[2]:.6f}")
+            logging.info(f"    Samples: {cluster_samples}, Mean R²: {cluster_r2_mean:.4f}")
+    else:
+        cluster_centers = None
+        worst_clusters = None
+        logging.info("Too few worst-performing samples for clustering analysis")
+
+    analysis_results = {
+        'notch_x': notch_x_valid,
+        'notch_depth': notch_depth_valid,
+        'notch_width': notch_width_valid,
+        'r2_scores': r2_valid,
+        'locations': locations_valid,
+        'parameters': X_valid,
+        'correlations': correlations,
+        'r2_percentiles': r2_percentiles,
+        'percentiles': percentiles,
+        'worst_params': worst_params,
+        'worst_r2': worst_r2,
+        'worst_threshold': worst_threshold,
+        'cluster_centers': cluster_centers,
+        'worst_clusters': worst_clusters
+    }
+
+    # Save analysis results
+    analysis_path = os.path.join(output_dir, 'mfsm_param_space_analysis.npz')
+    np.savez(analysis_path, **analysis_results)
+    logging.info(f"Saved parameter space analysis to {analysis_path}")
+
+    return analysis_results
+
+def create_parameter_space_visualizations(analysis_results, output_dir):
+    """
+    Create comprehensive visualizations of parameter space performance.
+
+    Generates plots showing how MFSM reconstruction quality varies across
+    the parameter space to identify problematic regions.
+
+    Args:
+        analysis_results: Dictionary from analyze_parameter_space_performance()
+        output_dir: Directory to save visualization files
+
+    Returns:
+        Dictionary containing paths to saved visualization files
+    """
+    logging.info("--- Creating Parameter Space Visualizations ---")
+
+    notch_x = analysis_results['notch_x']
+    notch_depth = analysis_results['notch_depth']
+    notch_width = analysis_results['notch_width']
+    r2_scores = analysis_results['r2_scores']
+    locations = analysis_results['locations']
+
+    # Create custom colormap (red=worst, yellow=medium, green=best)
+    from matplotlib.colors import LinearSegmentedColormap
+    colors = ['darkred', 'red', 'orange', 'yellow', 'lightgreen', 'green', 'darkgreen']
+    n_bins = 100
+    cmap = LinearSegmentedColormap.from_list('performance', colors, N=n_bins)
+
+    # === 1. 3D Parameter Space Plot ===
+    fig = plt.figure(figsize=(15, 12))
+
+    # 3D scatter plot
+    ax1 = fig.add_subplot(221, projection='3d')
+    scatter3d = ax1.scatter(notch_x, notch_depth, notch_width,
+                           c=r2_scores, cmap=cmap, s=30, alpha=0.6)
+    ax1.set_xlabel('Notch X (Location)')
+    ax1.set_ylabel('Notch Depth')
+    ax1.set_zlabel('Notch Width')
+    ax1.set_title('3D Parameter Space Performance')
+
+    # Add colorbar
+    cbar = plt.colorbar(scatter3d, ax=ax1, shrink=0.5, aspect=20)
+    cbar.set_label('R² Score (ROI)', rotation=270, labelpad=15)
+
+    # Set viewing angle
+    ax1.view_init(elev=20, azim=45)
+
+    # === 2. Parameter Pair Plots ===
+    # Notch X vs Notch Depth
+    ax2 = fig.add_subplot(222)
+    scatter2d_1 = ax2.scatter(notch_x, notch_depth, c=r2_scores, cmap=cmap, s=20, alpha=0.7)
+    ax2.set_xlabel('Notch X (Location)')
+    ax2.set_ylabel('Notch Depth')
+    ax2.set_title('Notch X vs Notch Depth')
+    plt.colorbar(scatter2d_1, ax=ax2, label='R² Score')
+    ax2.grid(True, alpha=0.3)
+
+    # Notch X vs Notch Width
+    ax3 = fig.add_subplot(223)
+    scatter2d_2 = ax3.scatter(notch_x, notch_width, c=r2_scores, cmap=cmap, s=20, alpha=0.7)
+    ax3.set_xlabel('Notch X (Location)')
+    ax3.set_ylabel('Notch Width')
+    ax3.set_title('Notch X vs Notch Width')
+    plt.colorbar(scatter2d_2, ax=ax3, label='R² Score')
+    ax3.grid(True, alpha=0.3)
+
+    # Notch Depth vs Notch Width
+    ax4 = fig.add_subplot(224)
+    scatter2d_3 = ax4.scatter(notch_depth, notch_width, c=r2_scores, cmap=cmap, s=20, alpha=0.7)
+    ax4.set_xlabel('Notch Depth')
+    ax4.set_ylabel('Notch Width')
+    ax4.set_title('Notch Depth vs Notch Width')
+    plt.colorbar(scatter2d_3, ax=ax4, label='R² Score')
+    ax4.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    param_pairs_path = os.path.join(output_dir, 'mfsm_param_pairs_performance.png')
+    plt.savefig(param_pairs_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    logging.info(f"Saved parameter pairs visualization to {param_pairs_path}")
+
+    # === 3. Individual Parameters vs R² ===
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    # Notch X vs R²
+    axes[0, 0].scatter(notch_x, r2_scores, alpha=0.6, s=20, c='steelblue')
+    axes[0, 0].set_xlabel('Notch X (Location)')
+    axes[0, 0].set_ylabel('R² Score')
+    axes[0, 0].set_title('Notch X vs Reconstruction Performance')
+    axes[0, 0].grid(True, alpha=0.3)
+
+    # Notch Depth vs R²
+    axes[0, 1].scatter(notch_depth, r2_scores, alpha=0.6, s=20, c='steelblue')
+    axes[0, 1].set_xlabel('Notch Depth')
+    axes[0, 1].set_ylabel('R² Score')
+    axes[0, 1].set_title('Notch Depth vs Reconstruction Performance')
+    axes[0, 1].grid(True, alpha=0.3)
+
+    # Notch Width vs R²
+    axes[1, 0].scatter(notch_width, r2_scores, alpha=0.6, s=20, c='steelblue')
+    axes[1, 0].set_xlabel('Notch Width')
+    axes[1, 0].set_ylabel('R² Score')
+    axes[1, 0].set_title('Notch Width vs Reconstruction Performance')
+    axes[1, 0].grid(True, alpha=0.3)
+
+    # Location vs R²
+    axes[1, 1].scatter(locations, r2_scores, alpha=0.6, s=20, c='steelblue')
+    axes[1, 1].set_xlabel('Response Location')
+    axes[1, 1].set_ylabel('R² Score')
+    axes[1, 1].set_title('Response Location vs Reconstruction Performance')
+    axes[1, 1].grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    param_vs_r2_path = os.path.join(output_dir, 'mfsm_param_vs_r2_analysis.png')
+    plt.savefig(param_vs_r2_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    logging.info(f"Saved parameter vs R² analysis to {param_vs_r2_path}")
+
+    # === 4. Performance Distribution and Statistics ===
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+
+    # R² distribution histogram
+    axes[0, 0].hist(r2_scores, bins=30, alpha=0.7, color='skyblue', edgecolor='black')
+    axes[0, 0].axvline(np.mean(r2_scores), color='red', linestyle='--', linewidth=2,
+                       label=f'Mean: {np.mean(r2_scores):.4f}')
+    axes[0, 0].axvline(np.median(r2_scores), color='orange', linestyle='--', linewidth=2,
+                       label=f'Median: {np.median(r2_scores):.4f}')
+    axes[0, 0].axvline(analysis_results['worst_threshold'], color='darkred', linestyle='--', linewidth=2,
+                       label=f'25th percentile: {analysis_results["worst_threshold"]:.4f}')
+    axes[0, 0].set_xlabel('R² Score')
+    axes[0, 0].set_ylabel('Frequency')
+    axes[0, 0].set_title('R² Score Distribution')
+    axes[0, 0].legend()
+    axes[0, 0].grid(True, alpha=0.3)
+
+    # Parameter distributions
+    axes[0, 1].hist(notch_x, bins=20, alpha=0.7, color='lightcoral', edgecolor='black')
+    axes[0, 1].set_xlabel('Notch X (Location)')
+    axes[0, 1].set_ylabel('Frequency')
+    axes[0, 1].set_title('Notch X Distribution')
+    axes[0, 1].grid(True, alpha=0.3)
+
+    axes[0, 2].hist(notch_depth, bins=20, alpha=0.7, color='lightgreen', edgecolor='black')
+    axes[0, 2].set_xlabel('Notch Depth')
+    axes[0, 2].set_ylabel('Frequency')
+    axes[0, 2].set_title('Notch Depth Distribution')
+    axes[0, 2].grid(True, alpha=0.3)
+
+    axes[1, 0].hist(notch_width, bins=20, alpha=0.7, color='lightblue', edgecolor='black')
+    axes[1, 0].set_xlabel('Notch Width')
+    axes[1, 0].set_ylabel('Frequency')
+    axes[1, 0].set_title('Notch Width Distribution')
+    axes[1, 0].grid(True, alpha=0.3)
+
+    # Performance by location
+    location_bins = np.linspace(locations.min(), locations.max(), 10)
+    location_performance = []
+    location_labels = []
+
+    for i in range(len(location_bins)-1):
+        mask = (locations >= location_bins[i]) & (locations < location_bins[i+1])
+        if np.sum(mask) > 0:
+            location_performance.append(r2_scores[mask])
+            location_labels.append(f"{location_bins[i]:.3f}-{location_bins[i+1]:.3f}")
+
+    if location_performance:
+        axes[1, 1].boxplot(location_performance, labels=location_labels)
+        axes[1, 1].set_xlabel('Location Range')
+        axes[1, 1].set_ylabel('R² Score')
+        axes[1, 1].set_title('Performance by Location')
+        axes[1, 1].tick_params(axis='x', rotation=45)
+        axes[1, 1].grid(True, alpha=0.3)
+
+    # Correlation heatmap
+    param_matrix = np.column_stack([notch_x, notch_depth, notch_width, r2_scores])
+    corr_matrix = np.corrcoef(param_matrix.T)
+    param_names_full = ['Notch X', 'Notch Depth', 'Notch Width', 'R² Score']
+
+    im = axes[1, 2].imshow(corr_matrix, cmap='coolwarm', vmin=-1, vmax=1, aspect='auto')
+    axes[1, 2].set_xticks(range(len(param_names_full)))
+    axes[1, 2].set_yticks(range(len(param_names_full)))
+    axes[1, 2].set_xticklabels(param_names_full, rotation=45)
+    axes[1, 2].set_yticklabels(param_names_full)
+    axes[1, 2].set_title('Parameter Correlation Matrix')
+
+    # Add correlation values to heatmap
+    for i in range(len(param_names_full)):
+        for j in range(len(param_names_full)):
+            axes[1, 2].text(j, i, f'{corr_matrix[i, j]:.3f}',
+                           ha='center', va='center', color='black', fontsize=8)
+
+    plt.colorbar(im, ax=axes[1, 2])
+
+    plt.tight_layout()
+    performance_dist_path = os.path.join(output_dir, 'mfsm_performance_distribution.png')
+    plt.savefig(performance_dist_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    logging.info(f"Saved performance distribution analysis to {performance_dist_path}")
+
+    # === 5. Highlight Worst Performing Regions ===
+    if analysis_results['cluster_centers'] is not None:
+        fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+        # Notch X vs Notch Depth with worst regions
+        scatter_worst_1 = axes[0].scatter(notch_x, notch_depth, c=r2_scores, cmap=cmap, s=20, alpha=0.4)
+
+        # Overlay worst performing clusters
+        for i, center in enumerate(analysis_results['cluster_centers']):
+            circle = plt.Circle((center[0], center[1]), 0.01, color='red', fill=False,
+                               linewidth=2, label=f'Problem Region {i+1}')
+            axes[0].add_patch(circle)
+            axes[0].plot(center[0], center[1], 'rx', markersize=10, markeredgewidth=3)
+
+        axes[0].set_xlabel('Notch X (Location)')
+        axes[0].set_ylabel('Notch Depth')
+        axes[0].set_title('Problem Regions: Notch X vs Notch Depth')
+        axes[0].legend()
+        axes[0].grid(True, alpha=0.3)
+        plt.colorbar(scatter_worst_1, ax=axes[0], label='R² Score')
+
+        # Notch X vs Notch Width with worst regions
+        scatter_worst_2 = axes[1].scatter(notch_x, notch_width, c=r2_scores, cmap=cmap, s=20, alpha=0.4)
+
+        for i, center in enumerate(analysis_results['cluster_centers']):
+            circle = plt.Circle((center[0], center[2]), 0.0002, color='red', fill=False,
+                               linewidth=2, label=f'Problem Region {i+1}')
+            axes[1].add_patch(circle)
+            axes[1].plot(center[0], center[2], 'rx', markersize=10, markeredgewidth=3)
+
+        axes[1].set_xlabel('Notch X (Location)')
+        axes[1].set_ylabel('Notch Width')
+        axes[1].set_title('Problem Regions: Notch X vs Notch Width')
+        axes[1].legend()
+        axes[1].grid(True, alpha=0.3)
+        plt.colorbar(scatter_worst_2, ax=axes[1], label='R² Score')
+
+        # Notch Depth vs Notch Width with worst regions
+        scatter_worst_3 = axes[2].scatter(notch_depth, notch_width, c=r2_scores, cmap=cmap, s=20, alpha=0.4)
+
+        for i, center in enumerate(analysis_results['cluster_centers']):
+            circle = plt.Circle((center[1], center[2]), 0.0001, color='red', fill=False,
+                               linewidth=2, label=f'Problem Region {i+1}')
+            axes[2].add_patch(circle)
+            axes[2].plot(center[1], center[2], 'rx', markersize=10, markeredgewidth=3)
+
+        axes[2].set_xlabel('Notch Depth')
+        axes[2].set_ylabel('Notch Width')
+        axes[2].set_title('Problem Regions: Notch Depth vs Notch Width')
+        axes[2].legend()
+        axes[2].grid(True, alpha=0.3)
+        plt.colorbar(scatter_worst_3, ax=axes[2], label='R² Score')
+
+        plt.tight_layout()
+        worst_regions_path = os.path.join(output_dir, 'mfsm_problematic_regions.png')
+        plt.savefig(worst_regions_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        logging.info(f"Saved problematic regions visualization to {worst_regions_path}")
+    else:
+        worst_regions_path = None
+
+    visualization_paths = {
+        'param_pairs': param_pairs_path,
+        'param_vs_r2': param_vs_r2_path,
+        'performance_dist': performance_dist_path,
+        'worst_regions': worst_regions_path
+    }
+
+    logging.info("--- Parameter Space Visualizations Complete ---")
+    return visualization_paths
+
+def identify_problematic_regions(analysis_results, output_dir):
+    """
+    Generate detailed statistics report identifying problematic parameter regions.
+
+    This function creates comprehensive statistics and recommendations for
+    strategic data sampling to improve MFSM model performance.
+
+    Args:
+        analysis_results: Dictionary from analyze_parameter_space_performance()
+        output_dir: Directory to save statistics report
+
+    Returns:
+        Dictionary containing statistics and recommendations
+    """
+    logging.info("--- Generating Problematic Regions Analysis ---")
+
+    notch_x = analysis_results['notch_x']
+    notch_depth = analysis_results['notch_depth']
+    notch_width = analysis_results['notch_width']
+    r2_scores = analysis_results['r2_scores']
+    locations = analysis_results['locations']
+    correlations = analysis_results['correlations']
+    worst_params = analysis_results['worst_params']
+    worst_r2 = analysis_results['worst_r2']
+    worst_threshold = analysis_results['worst_threshold']
+    cluster_centers = analysis_results['cluster_centers']
+
+    # Generate comprehensive statistics report
+    report_lines = []
+    report_lines.append("="*80)
+    report_lines.append("MFSM PARAMETER SPACE PERFORMANCE ANALYSIS REPORT")
+    report_lines.append("="*80)
+    report_lines.append(f"Generated on: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    report_lines.append(f"Total test samples analyzed: {len(r2_scores)}")
+    report_lines.append("")
+
+    # === Overall Performance Summary ===
+    report_lines.append("1. OVERALL PERFORMANCE SUMMARY")
+    report_lines.append("-" * 40)
+    report_lines.append(f"R² Score Range: [{r2_scores.min():.6f}, {r2_scores.max():.6f}]")
+    report_lines.append(f"Mean R² Score: {r2_scores.mean():.6f}")
+    report_lines.append(f"Median R² Score: {np.median(r2_scores):.6f}")
+    report_lines.append(f"Std Dev R² Score: {r2_scores.std():.6f}")
+    report_lines.append("")
+
+    # Performance percentiles
+    report_lines.append("Performance Distribution:")
+    for p, val in zip(analysis_results['percentiles'], analysis_results['r2_percentiles']):
+        report_lines.append(f"  {p}th percentile: {val:.6f}")
+    report_lines.append("")
+
+    # === Parameter Statistics ===
+    report_lines.append("2. PARAMETER STATISTICS")
+    report_lines.append("-" * 40)
+
+    params_dict = {
+        'Notch X (Location)': notch_x,
+        'Notch Depth': notch_depth,
+        'Notch Width': notch_width,
+        'Response Location': locations
+    }
+
+    for param_name, param_values in params_dict.items():
+        report_lines.append(f"{param_name}:")
+        report_lines.append(f"  Range: [{param_values.min():.6f}, {param_values.max():.6f}]")
+        report_lines.append(f"  Mean: {param_values.mean():.6f}")
+        report_lines.append(f"  Std Dev: {param_values.std():.6f}")
+        report_lines.append("")
+
+    # === Parameter-Performance Correlations ===
+    report_lines.append("3. PARAMETER-PERFORMANCE CORRELATIONS")
+    report_lines.append("-" * 40)
+    report_lines.append("Pearson correlation coefficients (p-values):")
+
+    for param_name, corr_data in correlations.items():
+        corr = corr_data['correlation']
+        p_val = corr_data['p_value']
+        significance = "***" if p_val < 0.001 else "**" if p_val < 0.01 else "*" if p_val < 0.05 else ""
+        report_lines.append(f"  {param_name}: r = {corr:.6f} (p = {p_val:.6f}) {significance}")
+    report_lines.append("")
+    report_lines.append("Significance levels: *** p < 0.001, ** p < 0.01, * p < 0.05")
+    report_lines.append("")
+
+    # === Worst Performing Samples Analysis ===
+    report_lines.append("4. WORST PERFORMING SAMPLES ANALYSIS")
+    report_lines.append("-" * 40)
+    report_lines.append(f"Worst performance threshold (25th percentile): {worst_threshold:.6f}")
+    report_lines.append(f"Number of samples below threshold: {len(worst_r2)} ({len(worst_r2)/len(r2_scores)*100:.1f}%)")
+    report_lines.append(f"Worst R² score: {worst_r2.min():.6f}")
+    report_lines.append(f"Mean R² of worst performers: {worst_r2.mean():.6f}")
+    report_lines.append("")
+
+    # Parameter ranges for worst performers
+    report_lines.append("Parameter ranges for worst performing samples:")
+    worst_notch_x = worst_params[:, 0]
+    worst_notch_depth = worst_params[:, 1]
+    worst_notch_width = worst_params[:, 2]
+
+    report_lines.append(f"  Notch X: [{worst_notch_x.min():.6f}, {worst_notch_x.max():.6f}]")
+    report_lines.append(f"  Notch Depth: [{worst_notch_depth.min():.6f}, {worst_notch_depth.max():.6f}]")
+    report_lines.append(f"  Notch Width: [{worst_notch_width.min():.6f}, {worst_notch_width.max():.6f}]")
+    report_lines.append("")
+
+    # === Cluster Analysis (if available) ===
+    if cluster_centers is not None:
+        report_lines.append("5. PROBLEMATIC REGIONS IDENTIFIED BY CLUSTERING")
+        report_lines.append("-" * 40)
+        report_lines.append(f"Number of problematic regions identified: {len(cluster_centers)}")
+        report_lines.append("")
+
+        for i, center in enumerate(cluster_centers):
+            # Count samples in this cluster
+            cluster_mask = analysis_results['worst_clusters'] == i
+            cluster_size = np.sum(cluster_mask)
+            cluster_r2_mean = worst_r2[cluster_mask].mean()
+            cluster_r2_range = [worst_r2[cluster_mask].min(), worst_r2[cluster_mask].max()]
+
+            report_lines.append(f"Region {i+1}:")
+            report_lines.append(f"  Center: notch_x={center[0]:.6f}, notch_depth={center[1]:.6f}, notch_width={center[2]:.6f}")
+            report_lines.append(f"  Samples: {cluster_size}")
+            report_lines.append(f"  R² range: [{cluster_r2_range[0]:.6f}, {cluster_r2_range[1]:.6f}]")
+            report_lines.append(f"  Mean R²: {cluster_r2_mean:.6f}")
+            report_lines.append("")
+    else:
+        report_lines.append("5. PROBLEMATIC REGIONS ANALYSIS")
+        report_lines.append("-" * 40)
+        report_lines.append("Insufficient worst-performing samples for clustering analysis")
+        report_lines.append("")
+
+    # === Strategic Sampling Recommendations ===
+    report_lines.append("6. STRATEGIC SAMPLING RECOMMENDATIONS")
+    report_lines.append("-" * 40)
+
+    # Find parameter regions with poor performance
+    performance_bins = 10
+    for param_idx, param_name in enumerate(['Notch X', 'Notch Depth', 'Notch Width']):
+        param_values = [notch_x, notch_depth, notch_width][param_idx]
+
+        # Calculate mean performance in parameter bins
+        bin_edges = np.linspace(param_values.min(), param_values.max(), performance_bins + 1)
+        bin_performance = []
+        bin_centers = []
+
+        for i in range(performance_bins):
+            mask = (param_values >= bin_edges[i]) & (param_values < bin_edges[i + 1])
+            if np.sum(mask) > 0:
+                bin_performance.append(r2_scores[mask].mean())
+                bin_centers.append((bin_edges[i] + bin_edges[i + 1]) / 2)
+
+        if bin_performance:
+            # Find worst performing bins
+            worst_bins = np.argsort(bin_performance)[:3]  # Top 3 worst bins
+            report_lines.append(f"{param_name} - Recommended sampling regions:")
+            for bin_idx in worst_bins:
+                perf = bin_performance[bin_idx]
+                center = bin_centers[bin_idx]
+                bin_range = [bin_edges[bin_idx], bin_edges[bin_idx + 1]]
+                report_lines.append(f"  Region {bin_range[0]:.6f} - {bin_range[1]:.6f} (avg R²: {perf:.6f})")
+            report_lines.append("")
+
+    # General recommendations
+    report_lines.append("General Recommendations:")
+    report_lines.append("1. Focus additional training data generation in parameter ranges")
+    report_lines.append("   identified above with R² scores below 0.5")
+    report_lines.append("2. Prioritize regions with high parameter correlation magnitude")
+    report_lines.append("3. Consider adaptive sampling strategies that target")
+    report_lines.append("   poorly performing regions identified by clustering")
+    report_lines.append("4. Validate improvements using the same ROI-based R² metric")
+    report_lines.append("")
+
+    # === Data Quality Check ===
+    report_lines.append("7. DATA QUALITY CHECK")
+    report_lines.append("-" * 40)
+
+    # Check for parameter distribution issues
+    for param_name, param_values in params_dict.items():
+        cv = param_values.std() / param_values.mean() if param_values.mean() != 0 else 0
+        if cv < 0.1:
+            report_lines.append(f"⚠️  Warning: {param_name} has low variability (CV = {cv:.3f})")
+
+    # Check for outliers in performance
+    q1, q3 = np.percentile(r2_scores, [25, 75])
+    iqr = q3 - q1
+    outliers = r2_scores[(r2_scores < q1 - 1.5*iqr) | (r2_scores > q3 + 1.5*iqr)]
+    if len(outliers) > 0:
+        report_lines.append(f"⚠️  Warning: {len(outliers)} performance outliers detected")
+
+    report_lines.append("")
+    report_lines.append("="*80)
+    report_lines.append("END OF REPORT")
+    report_lines.append("="*80)
+
+    # Save report to file
+    report_path = os.path.join(output_dir, 'mfsm_param_space_stats.txt')
+    with open(report_path, 'w') as f:
+        f.write('\n'.join(report_lines))
+
+    logging.info(f"Saved parameter space statistics report to {report_path}")
+
+    # Also create a separate problematic regions report
+    if cluster_centers is not None:
+        problematic_report_lines = []
+        problematic_report_lines.append("MFSM PROBLEMATIC REGIONS SUMMARY")
+        problematic_report_lines.append("="*50)
+        problematic_report_lines.append("")
+
+        for i, center in enumerate(cluster_centers):
+            cluster_mask = analysis_results['worst_clusters'] == i
+            cluster_size = np.sum(cluster_mask)
+            cluster_r2_mean = worst_r2[cluster_mask].mean()
+
+            problematic_report_lines.append(f"Problematic Region {i+1}:")
+            problematic_report_lines.append(f"  Center Parameters:")
+            problematic_report_lines.append(f"    - Notch X (Location): {center[0]:.6f}")
+            problematic_report_lines.append(f"    - Notch Depth: {center[1]:.6f}")
+            problematic_report_lines.append(f"    - Notch Width: {center[2]:.6f}")
+            problematic_report_lines.append(f"  Performance:")
+            problematic_report_lines.append(f"    - Samples in region: {cluster_size}")
+            problematic_report_lines.append(f"    - Mean R²: {cluster_r2_mean:.6f}")
+            problematic_report_lines.append(f"    - Suggested sampling radius:")
+            problematic_report_lines.append(f"      * Notch X: ±0.010")
+            problematic_report_lines.append(f"      * Notch Depth: ±0.00005")
+            problematic_report_lines.append(f"      * Notch Width: ±0.00005")
+            problematic_report_lines.append("")
+
+        problematic_report_lines.append("Sampling Strategy:")
+        problematic_report_lines.append("1. Generate 50-100 new samples per problematic region")
+        problematic_report_lines.append("2. Use the suggested parameters as centers with random perturbations")
+        problematic_report_lines.append("3. Validate improvement using same test methodology")
+        problematic_report_lines.append("")
+
+        # Save problematic regions report
+        problematic_path = os.path.join(output_dir, 'mfsm_problematic_regions.txt')
+        with open(problematic_path, 'w') as f:
+            f.write('\n'.join(problematic_report_lines))
+
+        logging.info(f"Saved problematic regions report to {problematic_path}")
+    else:
+        problematic_path = None
+
+    statistics_results = {
+        'report_path': report_path,
+        'problematic_path': problematic_path,
+        'correlations': correlations,
+        'worst_threshold': worst_threshold,
+        'cluster_centers': cluster_centers
+    }
+
+    logging.info("--- Problematic Regions Analysis Complete ---")
+    return statistics_results
+
 def random_sample_hfsm_data(X_hfsm_train, Y_hfsm_train, num_samples=None):
     """
     Randomly sample HFSM training data for fine-tuning.
@@ -2268,6 +2911,35 @@ def main():
     # Save predictions as numpy array
     np.save(os.path.join(CONFIG['OUTPUT_DIR'], 'mfsm_predictions_test.npy'), Y_pred_test)
 
+    # ===== PARAMETER SPACE PERFORMANCE ANALYSIS =====
+    logging.info("\n" + "="*60)
+    logging.info("PARAMETER SPACE PERFORMANCE ANALYSIS")
+    logging.info("="*60)
+
+    # Analyze parameter space performance using test results
+    param_analysis_results = analyze_parameter_space_performance(
+        X_hfsm_test, Y_hfsm_test, Y_pred_test, CONFIG['OUTPUT_DIR']
+    )
+
+    # Create parameter space visualizations
+    param_visualization_paths = create_parameter_space_visualizations(
+        param_analysis_results, CONFIG['OUTPUT_DIR']
+    )
+
+    # Generate statistics and problematic regions report
+    param_statistics_results = identify_problematic_regions(
+        param_analysis_results, CONFIG['OUTPUT_DIR']
+    )
+
+    logging.info("Parameter Space Analysis Complete!")
+    logging.info("Generated Files:")
+    for name, path in param_visualization_paths.items():
+        if path:
+            logging.info(f"  - {name}: {os.path.basename(path)}")
+    logging.info(f"  - Statistics: {os.path.basename(param_statistics_results['report_path'])}")
+    if param_statistics_results['problematic_path']:
+        logging.info(f"  - Problematic Regions: {os.path.basename(param_statistics_results['problematic_path'])}")
+
     # Create comparison plots (conditional based on SAVE_COMPARISON_PLOTS flag)
     if CONFIG['SAVE_COMPARISON_PLOTS']:
         logging.info("Creating comparison plots (SAVE_COMPARISON_PLOTS=True)...")
@@ -2351,6 +3023,14 @@ def main():
         logging.info("  - individual_histograms/ (Individual R² histograms for all samples)")
     else:
         logging.info("  - Comparison plots skipped (SAVE_COMPARISON_PLOTS=False)")
+    logging.info("  === PARAMETER SPACE ANALYSIS FILES ===")
+    logging.info("  - mfsm_param_space_analysis.npz (Parameter-performance analysis data)")
+    logging.info("  - mfsm_param_pairs_performance.png (3D and 2D parameter space plots)")
+    logging.info("  - mfsm_param_vs_r2_analysis.png (Individual parameters vs R²)")
+    logging.info("  - mfsm_performance_distribution.png (Performance distribution and stats)")
+    logging.info("  - mfsm_problematic_regions.png (Identified problematic regions)")
+    logging.info("  - mfsm_param_space_stats.txt (Comprehensive statistics report)")
+    logging.info("  - mfsm_problematic_regions.txt (Strategic sampling recommendations)")
     logging.info("  === PARAMETER-LATENT ANALYSIS FILES ===")
     logging.info("  - train_param_latent_pairs.npz (Training parameter-latent pairs)")
     logging.info("  - test_param_latent_pairs.npz (Test parameter-latent pairs)")
