@@ -413,15 +413,622 @@ Triangulation using multiple transducer pairs enables localization~\cite{giurgiu
 Damage characterization extracts quantitative defect information. Signal features correlating with damage include scattered wave amplitude (increasing with defect size), frequency content changes (larger defects scatter lower frequencies), and time-domain waveform shape (encoding defect geometry).
 
 
-Integration of Lamb wave measurements with machine learning and surrogate modeling addresses traditional challenges. Data-driven models learn complex relationships directly from data, bypassing analytical scattering solutions. The multi-fidelity framework efficiently combines expensive high-fidelity simulations with abundant low-fidelity data, enabling rapid damage characterization for real-world monitoring. Following chapters develop these concepts, showing how computational and machine learning tools transform Lamb wave measurements into precise, quantitative damage assessments.
+Integration of Lamb wave measurements with machine learning and surrogate modeling addresses traditional challenges. Data-driven models learn complex relationships directly from data, bypassing analytical scattering solutions. The multi-fidelity framework combines expensive high-fidelity simulations with abundant low-fidelity data, enabling the characterization of damage for real-world monitoring. The following chapters develop these concepts, showing how computational and machine learning tools transform Lamb wave measurements into precise, quantitative damage assessments.
 
-\chapter{Simulation of Lamb Waves using Elastic Beam or Plate Theories}
+\chapter{Simulation of Lamb Waves using 2D Elastic Beam and Reduced Order Model Theories}
 \label{Introduce different 1D models and a reference 2D model}
 
+\section{1D Beam Zigzag Theory}
+\label{sec:zigzag_theory}
+The zigzag theory for laminated composite beams represents a refinement of classical beam theories that addresses the limitations of traditional approaches when dealing with layered structures. Unlike classical theories that assume linear displacement variation through the beam thickness, zigzag theory incorporates the material discontinuities between layers by allowing piecewise-linear displacement patterns that capture the sudden changes in material properties at layer interfaces.
+
+Consider a laminated composite beam of total height $h$ consisting of $N$ perfectly bonded layers, where each layer $k$ extends from coordinate $z_{k-1}$ to $z_k$ measured from a reference plane. The beam extends along the longitudinal $x$-direction with length $L$, while the $z$-direction represents the through-thickness coordinate. The fundamental assumption underlying zigzag theory is that the axial displacement exhibits a layerwise linear variation that accounts for the transverse shear deformation effects neglected in classical beam theories.
+
+The theory assumes that each layer behaves as a linear elastic material with distinct material properties, creating interfaces where material properties change discontinuously. These material discontinuities generate interlaminar shear stress concentrations that classical theories cannot accurately predict. The zigzag approach addresses this limitation by introducing a zigzag function that captures the layer-dependent linear variation of axial displacement while maintaining displacement continuity across layer interfaces.
+
+For the specific case of three-layer composite beams under consideration, the layers are designated as bottom ($k=1$), middle ($k=2$), and top ($k=3$), with interfaces located at $z_1$ and $z_2$. Each layer possesses distinct elastic moduli $E^{(k)}$, shear moduli $G^{(k)}$, and densities $\rho^{(k)}$, while maintaining perfect bonding at all interfaces.
+
+The displacement field in zigzag theory is expressed through three primary kinematic variables that represent the global beam behavior, enhanced by a zigzag function that captures local layer effects. The axial displacement $u(x,z,t)$ is formulated as:
+
+\begin{equation}
+    u(x,z,t) = u_0(x,t) - z \frac{\partial w_0}{\partial x}(x,t) + R^{(k)}(z) \, \psi_0(x,t)
+\end{equation}
+
+
+where \(u_0(x,t)\) represents the axial displacement of the reference plane located at \(z = 0\), \(w_0(x,t)\) denotes the transverse displacement, and \(\psi_0(x,t)\) is the shear deformation parameter related to the average shear strain of the reference plane. The term \(- z \frac{\partial w_0}{\partial x}\)
+
+represents the classical Euler--Bernoulli contribution, while $R^{(k)}(z)$ is the layer-dependent zigzag function.
+
+The transverse displacement is assumed to remain constant across the beam thickness, consistent with the assumption of inextensible normals:
+\begin{equation}
+   w(x,z,t) = w_0(x,t) 
+\end{equation}
+
+
+This assumption is valid for slender beams where the length-to-thickness ratio is sufficiently large, typically greater than $10$. For the analysis of ultrasonic wave propagation in composite beams, this assumption remains appropriate given the high frequency content and the associated short wavelengths relative to beam thickness.
+
+The displacement field can be expressed in compact matrix form as:
+
+\begin{equation}
+\mathbf{u}(x,z,t) = 
+\begin{Bmatrix}
+u(x,z,t) \\
+w(x,z,t)
+\end{Bmatrix}
+=
+\begin{bmatrix}
+1 & -z\frac{\partial }{\partial x} & R^{(k)}(z) \\
+0 & 1 & 0
+\end{bmatrix}
+\begin{Bmatrix}
+u_0(x,t) \\
+w_0(x,t) \\
+\psi_0(x,t)
+\end{Bmatrix}
+\end{equation}
+
+
+This formulation reduces the infinite degrees of freedom associated with the continuum displacement field to three generalized displacement variables, enabling efficient computational implementation while maintaining the essential physics of layered beam behavior.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{zigzaglayer.png}
+\caption{Schematic Representation of an
+N-Layer Laminated Composite Beam}
+\label{fig:zigzag_layer}
+\end{figure}
+
+The strain components relevant to beam theory are the axial strain $\varepsilon_x$ and the transverse shear strain $\gamma_{xz}$. These strains are derived from the displacement field through standard kinematic relations.
+
+The axial strain is obtained as:
+\begin{equation}
+\varepsilon_x = \frac{\partial u}{\partial x} 
+= \frac{\partial u_0}{\partial x} 
+- z \frac{\partial^2 w_0}{\partial x^2} 
++ R^{(k)}(z) \frac{\partial \psi_0}{\partial x}
+\end{equation}
+
+This expression reveals the three distinct contributions to axial strain: the membrane strain 
+$\frac{\partial u_0}{\partial x}$, the bending strain 
+$- z \frac{\partial^2 w_0}{\partial x^2}$, and the zigzag contribution 
+$R^{(k)}(z) \frac{\partial \psi_0}{\partial x}$ that captures the layer-wise linear variation.
+
+The transverse shear strain is formulated as:
+\begin{equation}
+\gamma_{xz} = \frac{\partial u}{\partial z} + \frac{\partial w}{\partial x} 
+= \frac{\partial R^{(k)}}{\partial z} \, \psi_0 
+\end{equation}
+
+Since the transverse displacement is independent of $z$, the shear strain depends only on the derivative of the zigzag function. The term 
+$\frac{\partial R^{(k)}}{\partial z}$ represents the layer-wise constant shear strain within each layer, while maintaining the necessary discontinuities at layer interfaces to accommodate different material properties.
+
+The strain field can be expressed in matrix notation as:
+\begin{equation}
+\begin{Bmatrix} \varepsilon_x \\ \gamma_{xz} \end{Bmatrix} =
+\begin{bmatrix} 
+\frac{\partial}{\partial x} & -z \frac{\partial^2}{\partial x^2} & R^{(k)}(z) \frac{\partial}{\partial x} \\
+0 & 0 & \frac{\partial R^{(k)}}{\partial z} 
+\end{bmatrix}
+\begin{Bmatrix} u_0 \\ w_0 \\ \psi_0 \end{Bmatrix}
+\end{equation}
+
+
+The zigzag function $R^{(k)}(z)$ must satisfy several critical conditions to ensure physical consistency and mathematical well-posedness. These conditions include displacement continuity at layer interfaces, stress continuity requirements, and appropriate boundary conditions at the beam's top and bottom surfaces.
+
+For a three-layer beam, the zigzag function is constructed as a piecewise cubic polynomial within each layer:
+\begin{equation}
+R^{(k)}(z) = a_0^{(k)} + a_1^{(k)} z + a_2^{(k)} z^2 + a_3^{(k)} z^3
+\end{equation}
+
+where the coefficients $a_0^{(k)}$, $a_1^{(k)}$, $a_2^{(k)}$, and $a_3^{(k)}$ are determined through the enforcement of continuity and boundary conditions.
+
+The fundamental continuity conditions require that the axial displacement remains continuous across layer interfaces. At the interface between layers $k$ and $k+1$ located at $z = z_k$, this condition yields:
+\begin{equation}
+R^{(k)}(z_k) = R^{(k+1)}(z_k)
+\end{equation}
+
+Additionally, the transverse shear stress must remain continuous across interfaces to maintain equilibrium. This condition is expressed as:
+\begin{equation}
+G^{(k)} \gamma_{xz}^{(k)} = G^{(k+1)} \gamma_{xz}^{(k+1)} \quad \text{at} \quad z = z_k
+\end{equation}
+
+Substituting the shear strain expression, this becomes:
+\begin{equation}
+G^{(k)} \frac{\partial R^{(k)}}{\partial z}\bigg|_{z=z_k} = 
+G^{(k+1)} \frac{\partial R^{(k+1)}}{\partial z}\bigg|_{z=z_k}
+\end{equation}
+
+The boundary conditions at the top and bottom surfaces require that the transverse shear stress vanishes for a free surface:
+\begin{equation}
+\gamma_{xz}^{(1)}\bigg|_{z=z_0} = \frac{\partial R^{(1)}}{\partial z}\bigg|_{z=z_0} \, \psi_0 = 0
+\end{equation}
+
+\begin{equation}
+\gamma_{xz}^{(N)}\bigg|_{z=z_N} = \frac{\partial R^{(N)}}{\partial z}\bigg|_{z=z_N} \, \psi_0 = 0
+\end{equation}
+
+The determination of the zigzag function coefficients requires establishing a system of twelve equations to uniquely define the twelve unknown coefficients. This system incorporates displacement continuity conditions at layer interfaces, shear stress continuity requirements, boundary conditions at free surfaces, and appropriate normalization constraints.
+The systematic solution of this constraint system yields the explicit expressions for the zigzag function coefficients in each layer. These coefficients define the piecewise cubic polynomials that capture the layer-wise linear variation of axial displacement while maintaining all necessary continuity and equilibrium requirements. The resulting zigzag functions completely characterize the enhanced displacement field and enable accurate representation of the through-thickness shear deformation behavior in laminated composite beams.
 
 
 
+\subsection{Constitutive Relations for Composite Layers}
 
+The constitutive relations for each layer relate the stress components to the strain components through the material properties. For each layer $k$, assuming isotropic material behavior within the layer, the stress-strain relations are:
+
+\begin{align}
+\sigma_x^{(k)} &= E^{(k)} \, \varepsilon_x^{(k)} \\
+\tau_{xz}^{(k)} &= G^{(k)} \, \gamma_{xz}^{(k)}
+\end{align}
+
+
+
+where $E^{(k)}$ and $G^{(k)}$ are the elastic and shear moduli of layer $k$, respectively. For isotropic materials, the shear modulus is related to the elastic modulus through:
+
+\begin{equation}
+G^{(k)} = \frac{E^{(k)}}{2 \left( 1 + \nu^{(k)} \right)}
+\end{equation}
+
+
+where $\nu^{(k)}$ is Poisson's ratio for layer $k$.
+
+Substituting the strain expressions into the constitutive relations yields:
+
+\begin{equation}
+\sigma_x^{(k)} = E^{(k)} \left[ 
+\frac{\partial u_0}{\partial x} 
+- z \frac{\partial^2 w_0}{\partial x^2} 
++ R^{(k)}(z) \frac{\partial \psi_0}{\partial x} 
+\right]
+\end{equation}
+
+
+\begin{equation}
+\tau_{xz}^{(k)} = G^{(k)} \left[ 
+\frac{\partial R^{(k)}}{\partial z} \, \psi_0 
+\right]
+\end{equation}
+
+
+These expressions reveal how the zigzag theory naturally captures the layer-wise variation of stresses while maintaining the necessary continuity conditions at interfaces.
+
+\subsection{Variational formulation and governing equations}
+\label{sec:variational}
+
+
+The governing equations for the zigzag beam theory are derived using Hamilton's principle, which states that the motion of a dynamic system between two specified times makes the action integral stationary. For conservative systems, Hamilton's principle is formulated as:
+
+\begin{equation}
+\delta \int_{t_1}^{t_2} L \, dt = 0
+\end{equation}
+
+where the Lagrangian is given by
+\begin{equation}
+L = T - U
+\end{equation}
+representing the difference between the kinetic energy $T$ and the strain energy $U$. The variational operator $\delta$ denotes the first variation of the action integral with respect to the generalized coordinates.
+
+\subsection*{Kinetic Energy Formulation}
+
+The kinetic energy for a three-layer zigzag beam of length $L$ and width $b$ is expressed as:
+
+\begin{equation}
+T = \frac{1}{2} \int_0^L \int_{z_0}^{z_3} \rho^{(k)} 
+\left[ \left(\frac{\partial u}{\partial t}\right)^2 
+     + \left(\frac{\partial w}{\partial t}\right)^2 \right] 
+\, b \, dz \, dx
+\end{equation}
+
+where $\rho^{(k)}$ denotes the density of layer $k$.  
+Substituting the zigzag displacement field expressions:
+
+\begin{align}
+u(x,z,t) &= u_0(x,t) - z \frac{\partial w_0}{\partial x}(x,t) 
+           + R^{(k)}(z) \, \psi_0(x,t) \\[6pt]
+w(x,z,t) &= w_0(x,t)
+\end{align}
+
+and performing the through-thickness integration yields:
+
+\begin{align}
+T = \frac{1}{2} \int_0^L \Big[ & I_{00}\dot{u}_0^2 + I_{00}\dot{w}_0^2 
++ I_{11}\left(\frac{\partial \dot{w}_0}{\partial x}\right)^2 + I_{22}\dot{\psi}_0^2 \nonumber \\
+& - 2I_{01}\dot{u}_0\frac{\partial \dot{w}_0}{\partial x} 
++ 2I_{02}\dot{u}_0\dot{\psi}_0 
+- 2I_{12}\frac{\partial \dot{w}_0}{\partial x}\dot{\psi}_0 \Big] dx
+\end{align}
+
+
+The inertia coefficients are defined through layerwise integration:
+
+\begin{align}
+I_{00} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} dz 
+       = \sum_{k=1}^{3} \rho^{(k)} b \, h^{(k)} \\[6pt]
+I_{01} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} z \, dz \\[6pt]
+I_{02} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} R^{(k)}(z) \, dz \\[6pt]
+I_{11} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} z^2 \, dz \\[6pt]
+I_{12} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} z \, R^{(k)}(z) \, dz \\[6pt]
+I_{22} &= \sum_{k=1}^{3} \rho^{(k)} b \int_{z_{k-1}}^{z_k} \left[ R^{(k)}(z) \right]^2 dz
+\end{align}
+where 
+\begin{equation}
+h^{(k)} = z_k - z_{k-1}
+\end{equation}
+represents the thickness of layer $k$.
+
+\subsection*{Strain Energy Formulation}
+
+The strain energy is expressed in terms of the stress and strain components:
+
+\begin{equation}
+U = \frac{1}{2} \int_0^L \int_{z_0}^{z_3} 
+\left( \sigma_x^{(k)} \, \varepsilon_x^{(k)} 
+     + \tau_{xz}^{(k)} \, \gamma_{xz}^{(k)} \right) 
+b \, dz \, dx
+\end{equation}
+
+Substituting the constitutive relations and strain expressions, and performing the through-thickness integration yields:
+
+\begin{align}
+U = \frac{1}{2} \int_0^L &\Bigg[ 
+A_{11} \left(\frac{\partial u_0}{\partial x}\right)^2 
++ A_{22} \left(\frac{\partial^2 w_0}{\partial x^2}\right)^2 
++ A_{33} \left(\frac{\partial \psi_0}{\partial x}\right)^2 
++ A_{44} \, \psi_0^2 \nonumber \\[6pt]
+&- 2A_{12} \frac{\partial u_0}{\partial x} \frac{\partial^2 w_0}{\partial x^2} 
++ 2A_{13} \frac{\partial u_0}{\partial x} \frac{\partial \psi_0}{\partial x} 
+- 2A_{23} \frac{\partial^2 w_0}{\partial x^2} \frac{\partial \psi_0}{\partial x}
+\Bigg] dx
+\end{align}
+
+The stiffness coefficients are defined as:
+
+\begin{align}
+A_{11} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} dz \\[6pt]
+A_{12} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} z \, dz \\[6pt]
+A_{13} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} R^{(k)}(z) \, dz \\[6pt]
+A_{22} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} z^2 \, dz \\[6pt]
+A_{23} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} z \, R^{(k)}(z) \, dz \\[6pt]
+A_{33} &= \sum_{k=1}^{3} E^{(k)} b \int_{z_{k-1}}^{z_k} \left[R^{(k)}(z)\right]^2 dz \\[6pt]
+A_{44} &= \sum_{k=1}^{3} G^{(k)} b \int_{z_{k-1}}^{z_k} \left[ \frac{\partial R^{(k)}}{\partial z} \right]^2 dz
+\end{align}
+
+
+\subsection*{Derivation of Governing Equations}
+
+Application of Hamilton's principle to the Lagrangian $L = T - U$ requires:
+
+\begin{equation}
+\delta \int_{t_1}^{t_2} (T - U) \, dt = 0
+\end{equation}
+
+Taking variations with respect to each generalized coordinate and applying integration by parts yields the three coupled governing equations:
+
+\paragraph{Axial Force Equilibrium:}
+\begin{equation}
+\frac{\partial N}{\partial x} 
+= I_{11} \frac{\partial^2 u_0}{\partial t^2} 
+- I_{12} \frac{\partial^2}{\partial x \, \partial t^2} w_0 
++ I_{13} \frac{\partial^2 \psi_0}{\partial t^2}
+\end{equation}
+
+\paragraph{Transverse Force and Moment Equilibrium:}
+\begin{equation}
+\frac{\partial^2 M}{\partial x^2} + \frac{\partial V_x}{\partial x} 
+= -I_{12} \frac{\partial^2}{\partial x \, \partial t^2} u_0 
++ I_{22} \frac{\partial^2}{\partial x^2 \partial t^2} w_0 
+- I_{23} \frac{\partial^2}{\partial x \, \partial t^2} \psi_0
+\end{equation}
+
+\paragraph{Zigzag Shear Equilibrium:}
+\begin{equation}
+\frac{\partial P}{\partial x} - V_x 
+= I_{13} \frac{\partial^2 u_0}{\partial t^2} 
+- I_{23} \frac{\partial^2}{\partial x \, \partial t^2} w_0 
++ I_{33} \frac{\partial^2 \psi_0}{\partial t^2}
+\end{equation}
+
+\subsection*{Stress Resultant Definitions}
+
+The stress resultants are defined through through-thickness integration of stresses:
+
+\paragraph{Axial Force Resultant:}
+\begin{align}
+N &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \sigma_x^{(k)} b \, dz \nonumber \\
+  &= A_{11} \frac{\partial u_0}{\partial x} 
+   - A_{12} \frac{\partial^2 w_0}{\partial x^2} 
+   + A_{13} \frac{\partial \psi_0}{\partial x}
+\end{align}
+
+\paragraph{Bending Moment Resultant:}
+\begin{align}
+M &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \sigma_x^{(k)} z \, b \, dz \nonumber \\
+  &= A_{12} \frac{\partial u_0}{\partial x} 
+   - A_{22} \frac{\partial^2 w_0}{\partial x^2} 
+   + A_{23} \frac{\partial \psi_0}{\partial x}
+\end{align}
+
+\paragraph{Zigzag Stress Resultant:}
+\begin{align}
+P &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \sigma_x^{(k)} R^{(k)}(z) b \, dz \nonumber \\
+  &= A_{13} \frac{\partial u_0}{\partial x} 
+   - A_{23} \frac{\partial^2 w_0}{\partial x^2} 
+   + A_{33} \frac{\partial \psi_0}{\partial x}
+\end{align}
+
+\paragraph{Transverse Shear Force Resultant:}
+\begin{align}
+V_x &= \sum_{k=1}^{3} \int_{z_{k-1}}^{z_k} \tau_{xz}^{(k)} b \, dz \nonumber \\
+    &= B_{1} \frac{\partial w_0}{\partial x} + B_{2} \, \psi_0
+\end{align}
+where $B_{1} = \langle Q_{55} \rangle$ and $B_{2} = \langle Q_{55} \, R^{(k)}_{,z} \rangle$ are effective shear coefficients obtained from through-thickness integration.
+
+\subsection*{Boundary Conditions}
+
+The natural boundary conditions derived from the variational principle are:  
+At any boundary ($x = 0$ or $x = L$), either the displacement or the corresponding force resultant must be specified:
+
+\[
+u_0 \; \text{specified} \quad \text{or} \quad N = 0
+\]
+
+\[
+w_0 \; \text{specified} \quad \text{or} \quad V_x = 0
+\]
+
+\[
+\frac{\partial w_0}{\partial x} \; \text{specified} \quad \text{or} \quad M = 0
+\]
+
+\[
+\psi_0 \; \text{specified} \quad \text{or} \quad P = 0
+\]
+
+These governing equations and boundary conditions completely characterize the dynamic behavior of three-layer zigzag beams. The theory captures the essential physics of layered structures through the zigzag displacement field while maintaining computational efficiency through the use of only three generalized displacement variables. The coupling between axial, bending, and zigzag effects through the inertia terms enables accurate prediction of wave propagation phenomena in laminated composite beams.
+
+\subsection{Finite Element Implementation of Zigzag Theory}
+
+The finite element method provides a systematic approach for discretizing the continuous zigzag beam theory into a computationally tractable form. The implementation requires careful consideration of interpolation functions, element formulation, and assembly procedures to maintain theoretical accuracy while ensuring numerical stability.
+
+
+
+\subsubsection*{Element Formulation and Interpolation Functions}
+
+The zigzag beam is discretized using two-node beam elements with enhanced kinematics. Each element contains physical nodes at its ends, and the nodal degrees of freedom are selected to ensure compatibility with the governing equations and continuity requirements.
+
+At each node $i$, the degrees of freedom are defined as:
+\begin{equation}
+    \mathbf{q}_i = \begin{Bmatrix} u_{0i} \\ w_{0i} \\ \theta_i \\ \psi_{0i} \end{Bmatrix}
+\end{equation}
+
+where $u_{0i}$ and $w_{0i}$ are the axial and transverse displacements, $\theta_i$ is the rotation of the transverse normal, and $\psi_{0i}$ is the zigzag amplitude.
+
+The complete element displacement vector is:
+\begin{equation}
+    \mathbf{q}^e = \begin{Bmatrix} u_{01} \\ w_{01} \\ \theta_1 \\ \psi_{01} \\ u_{02} \\ w_{02} \\ \theta_2 \\ \psi_{02} \end{Bmatrix}.
+\end{equation}
+
+
+Linear Lagrange interpolation is employed for $u_0$ and $\psi_0$, while cubic Hermite interpolation is used for $w_0$ to ensure $C^1$ continuity. The interpolation functions are expressed in matrix form as:
+\begin{equation}
+   \begin{Bmatrix} u_0(\xi) \\ w_0(\xi) \\ \psi_0(\xi) \end{Bmatrix} 
+= \mathbf{N}(\xi) \, \mathbf{q}^e,
+\end{equation}
+
+where $\mathbf{N}(\xi)$ is the shape function matrix and $\xi$ is the natural coordinate.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{coordinate_system.png}
+\caption{A spectral strip element, formulated using zigzag theory (ZIGT), which possesses 'n' internal nodes, each with associated degrees of freedom (DOFs)}
+\label{fig:coordinate_system}
+\end{figure}
+
+\subsection*{Strain-Displacement Matrix Formulation}
+
+The strain-displacement relationships are derived by differentiating the interpolation functions. The axial and transverse shear strains are given by:
+\begin{equation}
+    \varepsilon_x = \frac{\partial u_0}{\partial x} - z \frac{\partial^2 w_0}{\partial x^2} + R^{(k)}(z)\frac{\partial \psi_0}{\partial x}
+\end{equation}
+
+\begin{equation}
+    \gamma_{xz} = \frac{\partial R^{(k)}}{\partial z} \psi_0 
+\end{equation}
+
+
+These relations are expressed in terms of nodal displacements through the strain-displacement matrix $\mathbf{B}^{(k)}$ for layer $k$.
+
+\subsubsection*{Element Mass Matrix}
+
+The element mass matrix is derived from the kinetic energy expression, which involves velocity products of the interpolated displacement field. The general form is:
+\begin{equation}
+    \mathbf{M}^e = \int_{-1}^{+1} \sum_{k=1}^{N} \int_{z_{k-1}}^{z_k} 
+\rho^{(k)} \left[ \mathbf{N}_u^T \mathbf{N}_u + \mathbf{N}_w^T \mathbf{N}_w \right] b \, \frac{l_e}{2} \, dz \, d\xi,
+\end{equation}
+
+where $\rho^{(k)}$ is the density of layer $k$, and $\mathbf{N}_u$, $\mathbf{N}_w$ are the submatrices of $\mathbf{N}$ associated with axial and transverse displacements.
+
+\subsubsection*{Element Stiffness Matrix}
+
+The element stiffness matrix is obtained from the strain energy:
+\begin{equation}
+    \mathbf{K}^e = \int_{-1}^{+1} \sum_{k=1}^{N} \int_{z_{k-1}}^{z_k} 
+(\mathbf{B}^{(k)})^T \mathbf{D}^{(k)} \mathbf{B}^{(k)} \, b \, \frac{l_e}{2} \, dz \, d\xi
+\end{equation}
+
+where $\mathbf{D}^{(k)}$ is the constitutive matrix of layer $k$. The layerwise zigzag function $R^{(k)}(z)$ and its derivative introduce coupling terms that enrich the kinematics of the beam element.
+
+\subsubsection*{Numerical Integration and Assembly}
+
+Numerical integration is employed due to the complexity of the integrands involving the zigzag function and material heterogeneity. Gaussian quadrature is applied in both the in-plane and through-thickness directions, with integration performed separately within each layer. The global mass and stiffness matrices are assembled from the element contributions, yielding the system:
+\begin{equation}
+\mathbf{M} \ddot{\mathbf{Q}} + \mathbf{C} \dot{\mathbf{Q}} + \mathbf{K} \mathbf{Q} = \mathbf{F}(t),
+\end{equation}
+where $\mathbf{Q}$ is the global displacement vector.
+
+
+\section{2D Elastic Beam Theory}
+\label{sec:2d_elastic_theory}
+
+The two-dimensional elastic beam theory represents the foundational framework for high-fidelity reference solutions in structural analysis, particularly when investigating complex deformation patterns and stress distributions in beam structures with geometric discontinuities. Unlike one-dimensional beam theories that rely on kinematic assumptions about displacement field variations, two-dimensional finite element approaches directly solve the governing equations of elasticity without introducing simplifying assumptions regarding through-thickness behavior.
+
+The two-dimensional formulation provides essential advantages for analyzing structures with geometric irregularities such as notches, where classical beam theory assumptions may become invalid. The approach captures local stress concentrations, complex deformation patterns near discontinuities, and the full stress tensor field throughout the structure, making it particularly suitable for validation of reduced-order modeling approaches and for establishing reference solutions in comparative analysis studies.
+
+\subsubsection{Fundamental Governing Equations}
+
+The two-dimensional elastic beam analysis is based on the fundamental equations of linear elasticity theory, which consist of equilibrium equations, kinematic relations, and constitutive laws. For a two-dimensional domain under plane stress or plane strain conditions, these equations provide a complete mathematical description of the mechanical behavior.
+
+The equilibrium equations in the absence of body forces are expressed as:
+
+\begin{equation}
+\frac{\partial \sigma_{xx}}{\partial x} + \frac{\partial \sigma_{xy}}{\partial y} = 0
+\end{equation}
+\begin{equation}
+\frac{\partial \sigma_{xy}}{\partial x} + \frac{\partial \sigma_{yy}}{\partial y} = 0
+\end{equation}
+
+where $\sigma_{xx}$, $\sigma_{yy}$, and $\sigma_{xy}$ represent the components of the Cauchy stress tensor in the two-dimensional coordinate system. These equations ensure force equilibrium at every point within the elastic continuum.
+
+The kinematic relations connect the displacement field components $u(x,y)$ and $v(x,y)$ to the strain components through the standard strain-displacement relationships:
+
+\begin{equation}
+\varepsilon_{xx} = \frac{\partial u}{\partial x}, \quad
+\varepsilon_{yy} = \frac{\partial v}{\partial y}, \quad
+\gamma_{xy} = \frac{\partial u}{\partial y} + \frac{\partial v}{\partial x}
+\end{equation}
+
+These relationships are exact for infinitesimal strain theory and provide the geometric compatibility conditions necessary for ensuring that the strain field corresponds to a continuous displacement field.
+
+\subsubsection{Constitutive Relations for Homogeneous Materials}
+
+For homogeneous isotropic materials, the constitutive relations relate stress and strain components through material parameters that remain constant throughout the domain. The stress-strain relationship depends on whether plane stress or plane strain conditions are assumed.
+
+Under plane stress conditions, appropriate for thin structures where the stress in the thickness direction is negligible, the constitutive relations are:
+
+\begin{equation}
+\begin{Bmatrix} 
+\sigma_{xx} \\ 
+\sigma_{yy} \\ 
+\sigma_{xy} 
+\end{Bmatrix} 
+= \frac{E}{1-\nu^2} 
+\begin{bmatrix} 
+1 & \nu & 0 \\ 
+\nu & 1 & 0 \\ 
+0 & 0 & \frac{1-\nu}{2} 
+\end{bmatrix} 
+\begin{Bmatrix} 
+\varepsilon_{xx} \\ 
+\varepsilon_{yy} \\ 
+\gamma_{xy} 
+\end{Bmatrix}
+\end{equation}
+
+For plane strain conditions, suitable for thick structures where strain in the thickness direction is constrained, the material stiffness matrix becomes:
+
+\begin{equation}
+\begin{Bmatrix} 
+\sigma_{xx} \\ 
+\sigma_{yy} \\ 
+\sigma_{xy} 
+\end{Bmatrix} 
+= \frac{E}{(1+\nu)(1-2\nu)} 
+\begin{bmatrix} 
+1-\nu & \nu & 0 \\ 
+\nu & 1-\nu & 0 \\ 
+0 & 0 & \frac{1-2\nu}{2} 
+\end{bmatrix} 
+\begin{Bmatrix} 
+\varepsilon_{xx} \\ 
+\varepsilon_{yy} \\ 
+\gamma_{xy} 
+\end{Bmatrix}
+\end{equation}
+
+In these expressions, $E$ represents Young's modulus and $\nu$ denotes Poisson's ratio, which are the fundamental material constants characterizing the elastic behavior of homogeneous isotropic materials.
+
+\subsubsection{Finite Element Discretization}
+
+The solution of the two-dimensional elasticity equations typically requires numerical methods due to the complexity of boundary conditions and geometric configurations encountered in practical applications. The finite element method provides a systematic approach for discretizing the continuum problem into a system of algebraic equations.
+
+The displacement field within each finite element is approximated using shape functions $N_i(x,y)$ and nodal displacement values:
+
+\begin{equation}
+u(x,y) = \sum_{i=1}^{n} N_i(x,y) u_i, \quad
+v(x,y) = \sum_{i=1}^{n} N_i(x,y) v_i
+\end{equation}
+
+where $n$ represents the number of nodes per element, and $u_i$, $v_i$ are the displacement components at node $i$.
+
+The strain components are obtained by differentiating the displacement approximations:
+
+\begin{equation}
+\begin{Bmatrix} 
+\varepsilon_{xx} \\ 
+\varepsilon_{yy} \\ 
+\gamma_{xy} 
+\end{Bmatrix} 
+= \sum_{i=1}^{n} 
+\begin{bmatrix} 
+\frac{\partial N_i}{\partial x} & 0 \\ 
+0 & \frac{\partial N_i}{\partial y} \\ 
+\frac{\partial N_i}{\partial y} & \frac{\partial N_i}{\partial x} 
+\end{bmatrix} 
+\begin{Bmatrix} 
+u_i \\ 
+v_i 
+\end{Bmatrix}
+\end{equation}
+
+This relationship defines the strain-displacement matrix $\mathbf{B}_i$ that relates nodal displacements to element strains.
+
+\subsubsection{Element Types and Formulations}
+
+Contemporary finite element implementations for two-dimensional elasticity problems employ various element types, each with specific advantages depending on the application requirements. The most commonly used elements include triangular and quadrilateral configurations with different orders of approximation.
+
+Linear triangular elements utilize three nodes and provide constant strain within each element. These elements are particularly effective for automatic mesh generation in complex geometries but may require significant mesh refinement to achieve acceptable accuracy in stress concentration regions.
+
+Quadrilateral elements with bilinear shape functions employ four nodes and offer improved accuracy compared to linear triangular elements for regular mesh configurations. These elements maintain computational efficiency while providing better representation of bending modes and stress gradients.
+
+Higher-order elements, such as quadratic triangular or serendipity quadrilateral elements, incorporate additional nodes along element edges or within the element interior. These formulations provide enhanced accuracy for smooth stress fields but require increased computational effort and may exhibit sensitivity to element distortion.
+
+\subsubsection{Boundary Conditions and Loading}
+
+The specification of appropriate boundary conditions is crucial for obtaining meaningful solutions to two-dimensional elasticity problems. Essential boundary conditions prescribe displacement values at specific locations, while natural boundary conditions specify traction forces or stress components.
+
+For beam-like structures, typical boundary conditions include:
+
+\begin{itemize}
+    \item \textbf{Fixed support conditions}: where both displacement components are prescribed as zero:
+    \[
+    u = v = 0
+    \]
+
+    \item \textbf{Simply supported conditions}: where normal displacement is constrained while tangential displacement remains free:
+    \[
+    v = 0, \quad \sigma_{xy} = 0
+    \]
+
+    \item \textbf{Applied tractions on boundary surfaces}: incorporated through the natural boundary conditions:
+    \[
+    \sigma_{xx} n_x + \sigma_{xy} n_y = t_x
+    \]
+    \[
+    \sigma_{xy} n_x + \sigma_{yy} n_y = t_y
+    \]
+\end{itemize}
+
+where $(n_x, n_y)$ represents the outward normal vector to the boundary and $(t_x, t_y)$ denotes the prescribed traction components.
+
+
+
+\subsubsection{Treatment of Geometric Discontinuities}
+
+The analysis of structures with geometric discontinuities such as notches requires special consideration in mesh design and solution interpretation. The presence of sharp corners and material boundaries creates stress concentrations that demand adequate spatial resolution for accurate capture.
+
+Mesh refinement strategies near geometric discontinuities typically employ graded meshes with element sizes decreasing toward the discontinuity. The rate of mesh refinement must balance computational efficiency with solution accuracy, particularly in regions where stress gradients become severe.
+
+The treatment of notch geometries requires careful attention to the representation of sharp corners and the transition between different geometric regions. The finite element discretization must accurately represent the geometric boundaries while maintaining element quality metrics necessary for stable numerical solutions.
 
 \bibliographystyle{unsrtnat}
 \bibliography{ref} 
