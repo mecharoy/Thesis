@@ -418,9 +418,13 @@ Integration of Lamb wave measurements with machine learning and surrogate modeli
 \chapter{Simulation of Lamb Waves using 2D Elastic Beam and Reduced Order Model Theories}
 \label{Introduce different 1D models and a reference 2D model}
 
+The generation of multi-fidelity datasets requires a clear understanding of the underlying theoretical frameworks that produce low- and high-fidelity simulations. This chapter begins with a detailed exposition of zigzag theory, a refined approach for modeling composite structures that accounts for layer-wise material discontinuities. The theory is then compared with classical one-dimensional models, such as Timoshenko and Euler-Bernoulli, to establish its computational advantages for wave propagation problems. Following this, the two-dimensional elastic beam theory is introduced as the high-fidelity reference model, which provides ground truth solutions by solving the full elasticity equations without kinematic assumptions. The chapter concludes by describing the systematic generation of both low- and high-fidelity datasets and their validation through wavefield visualization. The distinction between these fidelity levels lies not in the choice of software but in the fundamental theoretical assumptions that govern each approach.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{1D Beam Zigzag Theory}
 \label{sec:zigzag_theory}
-The zigzag theory for laminated composite beams represents a refinement of classical beam theories that addresses the limitations of traditional approaches when dealing with layered structures. Unlike classical theories that assume linear displacement variation through the beam thickness, zigzag theory incorporates the material discontinuities between layers by allowing piecewise-linear displacement patterns that capture the sudden changes in material properties at layer interfaces.
+The zigzag theory for laminated composite beams represents a refinement of classical beam theories that addresses the limitations of traditional approaches when dealing with layered structures. We first develop this theory for a general composite case where material properties vary across layers. Unlike classical theories that assume linear displacement variation through the beam thickness, zigzag theory incorporates the material discontinuities between layers by allowing piecewise-linear displacement patterns that capture the sudden changes in material properties at layer interfaces. Subsequently, we examine the limiting case of a homogeneous beam to establish the use case for our research in relation to established classical results.
 
 Consider a laminated composite beam of total height $h$ consisting of $N$ perfectly bonded layers, where each layer $k$ extends from coordinate $z_{k-1}$ to $z_k$ measured from a reference plane. The beam extends along the longitudinal $x$-direction with length $L$, while the $z$-direction represents the through-thickness coordinate. The fundamental assumption underlying zigzag theory is that the axial displacement exhibits a layerwise linear variation that accounts for the transverse shear deformation effects neglected in classical beam theories.
 
@@ -865,6 +869,265 @@ Numerical integration is employed due to the complexity of the integrands involv
 \mathbf{M} \ddot{\mathbf{Q}} + \mathbf{C} \dot{\mathbf{Q}} + \mathbf{K} \mathbf{Q} = \mathbf{F}(t),
 \end{equation}
 where $\mathbf{Q}$ is the global displacement vector.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Comparative Analysis of One-Dimensional Beam Theories for Lamb Wave Propagation}
+\label{sec:comparison_1d_theories}
+
+Having established the theoretical foundation of zigzag beam theory in the previous section, it becomes essential to evaluate its performance relative to classical one-dimensional beam theories. This comparison serves two purposes: first, it validates the necessity of employing a refined theory for Lamb wave propagation analysis; second, it demonstrates why zigzag theory constitutes an appropriate choice for the low-fidelity model in the multi-fidelity framework. This section introduces the classical Euler--Bernoulli and Timoshenko beam theories, establishes a numerical benchmark problem involving a notched beam, and presents a comparative analysis of wave propagation responses predicted by the three theories.
+
+\subsection{Classical One-Dimensional Beam Theories}
+
+\subsubsection{Euler--Bernoulli Beam Theory}
+
+The Euler--Bernoulli beam theory represents the simplest framework for analyzing beam deformation and has been extensively employed in structural dynamics for over two centuries. The theory rests on the fundamental kinematic assumption that plane sections initially perpendicular to the beam axis remain plane and perpendicular after deformation. This assumption implicitly neglects transverse shear deformation, making the theory most accurate for slender beams where the length-to-height ratio exceeds approximately 10.
+
+The displacement field in Euler--Bernoulli theory is expressed as:
+\begin{equation}
+u(x,z,t) = u_0(x,t) - z \frac{\partial w_0}{\partial x}(x,t), \quad w(x,z,t) = w_0(x,t)
+\end{equation}
+where $u_0$ and $w_0$ represent the axial and transverse displacements of the beam axis, respectively. The governing equations for free vibration, derived from Hamilton's principle, reduce to two uncoupled partial differential equations:
+
+\begin{align}
+EA \frac{\partial^2 u_0}{\partial x^2} &= \rho A \frac{\partial^2 u_0}{\partial t^2} \label{eq:EB_axial}\\
+EI \frac{\partial^4 w_0}{\partial x^4} + \rho A \frac{\partial^2 w_0}{\partial t^2} &= 0 \label{eq:EB_bending}
+\end{align}
+
+where $A$ is the cross-sectional area and $I$ is the second moment of area. The first equation governs longitudinal wave propagation with wave speed $c_L = \sqrt{E/\rho}$, while the second describes flexural wave propagation. The flexural waves exhibit strong dispersion, with the dispersion relation $\omega^2 = EI k^4 / (\rho A)$, where $k$ is the wavenumber.
+
+The theory's principal limitation for high-frequency wave propagation stems from its neglect of shear deformation and rotary inertia. For Lamb wave frequencies typically employed in structural health monitoring (50--500 kHz), these effects become significant, particularly for the antisymmetric mode $A_0$, which possesses strong flexural characteristics.
+
+\subsubsection{Timoshenko Beam Theory}
+
+Timoshenko beam theory addresses the primary deficiency of Euler--Bernoulli theory by incorporating transverse shear deformation and rotary inertia effects. The theory introduces an independent rotation variable $\phi(x,t)$ that is no longer constrained to equal the slope of the deflected axis $\partial w_0/\partial x$. The difference between these quantities represents the shear deformation of the beam.
+
+The displacement field in Timoshenko theory takes the form:
+\begin{equation}
+u(x,z,t) = u_0(x,t) - z \phi(x,t), \quad w(x,z,t) = w_0(x,t)
+\end{equation}
+
+The governing equations for the transverse motion consist of two coupled partial differential equations:
+\begin{align}
+\kappa GA \left(\frac{\partial w_0}{\partial x} - \phi\right) &= \rho A \frac{\partial^2 w_0}{\partial t^2} \label{eq:Tim_shear}\\
+EI \frac{\partial^2 \phi}{\partial x^2} + \kappa GA \left(\frac{\partial w_0}{\partial x} - \phi\right) &= \rho I \frac{\partial^2 \phi}{\partial t^2} \label{eq:Tim_moment}
+\end{align}
+
+where $\kappa$ is the shear correction factor, typically taken as $5/6$ for rectangular cross-sections, which accounts for the non-uniform distribution of shear stress across the beam height. The longitudinal motion remains governed by Eq.~\eqref{eq:EB_axial}.
+
+Timoshenko theory provides improved accuracy for moderately thick beams and extends the valid frequency range compared to Euler--Bernoulli theory. However, the constant shear correction factor represents an approximation that cannot capture the true through-thickness variation of displacement and stress fields. Furthermore, for layered or damaged structures where material properties vary through the thickness, the single-valued shear correction factor becomes inadequate.
+
+\subsubsection{Comparison with Zigzag Theory}
+
+Table~\ref{tab:theory_comparison} presents a systematic comparison of the three beam theories. The zigzag theory distinguishes itself through its ability to represent piecewise-linear through-thickness displacement variation via the zigzag function $R^{(k)}(z)$. This capability proves essential for accurately capturing Lamb wave behavior, where different wave modes exhibit distinct through-thickness displacement patterns.
+
+\begin{table}[h]
+\centering
+\caption{Comparison of one-dimensional beam theories}
+\label{tab:theory_comparison}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Feature} & \textbf{Euler--Bernoulli} & \textbf{Timoshenko} & \textbf{Zigzag} \\
+\midrule
+DOFs per node & 2 & 3 & 4 \\
+Through-thickness variation & Linear & Linear & Piecewise cubic \\
+Shear deformation & Neglected & Constant & Layer-wise \\
+Rotary inertia & Neglected & Included & Included \\
+Suitable for high-freq. waves & Poor & Moderate & Good \\
+Computational cost (relative) & 1$\times$ & 1.5$\times$ & \approx 1.5$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The computational cost of zigzag theory, while higher than classical theories due to the additional degree of freedom, remains orders of magnitude lower than two-dimensional finite element analysis. This favorable balance between accuracy and computational efficiency motivates its selection as the low-fidelity model for the multi-fidelity surrogate framework.
+
+\subsection{Numerical Benchmark Configuration}
+
+To quantitatively assess the predictive capabilities of the three beam theories, a benchmark problem is established involving Lamb wave propagation in a notched aluminum beam. The configuration is designed to represent a realistic structural health monitoring scenario where a pitch-catch transducer pair interrogates a structure containing surface damage.
+
+\subsubsection{Beam Geometry and Material Properties}
+
+The benchmark beam possesses the following geometric and material characteristics:
+
+\begin{itemize}
+    \item \textbf{Length:} $L = 3.0$ m
+    \item \textbf{Height:} $h = 1.5$ mm
+    \item \textbf{Width:} $b = 1.0$ m (plane strain conditions)
+    \item \textbf{Material:} Aluminum
+    \item \textbf{Young's modulus:} $E = 70$ GPa
+    \item \textbf{Density:} $\rho = 2700$ kg/m$^3$
+    \item \textbf{Poisson's ratio:} $\nu = 0.33$
+\end{itemize}
+
+These dimensions yield a length-to-height ratio of 2000, representing a thin plate-like structure typical of aerospace and mechanical components. The material properties correspond to aluminum alloy 6061, commonly employed in structural applications due to its favorable strength-to-weight ratio and corrosion resistance.
+
+\subsubsection{Notch Configuration}
+
+A rectangular notch is introduced to simulate surface damage resulting from fatigue crack initiation, corrosion, or manufacturing defects. The notch parameters are:
+
+\begin{itemize}
+    \item \textbf{Location:} $x_{\text{notch}} = 1.75$ m
+    \item \textbf{Depth:} $d_{\text{notch}} = 1.0$ mm (67\% of beam height)
+    \item \textbf{Width:} $w_{\text{notch}} = 1.0$ mm
+\end{itemize}
+
+The notch depth of 1.0 mm represents significant structural damage, reducing the local height to 0.5 mm. This substantial reduction in cross-section creates pronounced wave scattering and mode conversion effects, providing a stringent test for the beam theories' ability to capture damage-induced wave phenomena.
+
+Figure~\ref{fig:benchmark_geometry} shows the general setup for the current benchmark configuration and serves as the basis for further tests to be discussed in the following sections.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{beamgeometry.png}
+\caption{General setup of the benchmark beam configuration with notch, actuator positions, and sensor location.}
+\label{fig:benchmark_geometry}
+\end{figure}
+
+\subsubsection{Actuator-Sensor Configuration}
+
+The analysis employs a pitch-catch configuration, where an actuator generate a pulse wave that propagates toward the notch, with a sensor positioned beyond the notch to capture transmitted and scattered waves. The specific configuration is:
+
+\textbf{Actuators:}
+\begin{itemize}
+    \item Actuator edge 1: $x_1 = 1.6465$ m
+    \item Actuator edge 2: $x_2 = 1.6535$ m
+    \item Separation distance: $\Delta x = 7.0$ mm
+    \item Actuation mode: Differential (out-of-phase)
+\end{itemize}
+
+The actuators apply equal magnitude but opposite sign forces, creating a localized bending moment. This differential actuation preferentially excites the antisymmetric $A_0$ mode while minimizing the symmetric $S_0$ mode, though both modes are present in the response due to the finite actuator separation and structural boundary conditions.
+
+\textbf{Sensor:}
+\begin{itemize}
+    \item Position: $x_{\text{sensor}} = 1.95$ m
+    \item Through-thickness location: $z_{\text{sensor}} = 0.75$ mm (top surface)
+    \item Distance from notch: 0.20 m
+    \item Measured quantity: Axial displacement $u(x_{\text{sensor}}, z_{\text{sensor}}, t)$
+\end{itemize}
+
+The sensor location at the top surface enables detection of both symmetric and antisymmetric modes, as well as any mode-converted waves generated by the notch. The 200 mm distance from the notch provides sufficient separation to resolve distinct wave packets for the incident, reflected, and transmitted waves.
+
+\subsubsection{Excitation Signal}
+
+The excitation force follows a Hanning-windowed toneburst signal, commonly employed in ultrasonic testing to provide a compromise between time-domain localization and frequency content:
+
+\begin{equation}
+F(t) = \begin{cases}
+A_0 \left[1 - \cos\left(\frac{2\pi t}{T_{\text{active}}}\right)\right] \sin(2\pi f_c t) & 0 \leq t \leq T_{\text{active}} \\
+0 & t > T_{\text{active}}
+\end{cases}
+\end{equation}
+
+where:
+\begin{itemize}
+    \item $A_0$ = Amplitude (normalized to unity for comparison)
+    \item $f_c$ = 100 kHz (center frequency)
+    \item $T_{\text{active}}$ = 50 $\mu$s (active excitation duration)
+    \item Total observation time: $T_{\text{total}}$ = 300 $\mu$s
+\end{itemize}
+
+The 100 kHz center frequency is selected based on typical structural health monitoring practice, providing a wavelength on the order of 50 mm for the $S_0$ mode, which is sufficiently long for wave propagation over meter-scale distances while remaining sensitive to millimeter-scale damage features. The Hanning window ensures smooth onset and termination of the excitation, minimizing unwanted high-frequency spectral content.
+
+Figure~\ref{fig:excitation_signal} displays the time-domain excitation signal, illustrating the Hanning envelope and the 100 kHz carrier frequency.
+
+\begin{figure}[h]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{4cm}PLACEHOLDER FIGURE\\Excitation signal showing:\\- Hanning window envelope (dashed line)\\- 100 kHz sinusoidal carrier\\- Active duration: 0--50 $\mu$s\\- Time axis: 0--300 $\mu$s\\\vspace{4cm}}}
+\caption{Hanning-windowed toneburst excitation signal at 100 kHz center frequency.}
+\label{fig:excitation_signal}
+\end{figure}
+
+\subsection{Notch Modeling in Classical Theories}
+
+A fundamental challenge in applying classical beam theories to damaged structures concerns the representation of geometric discontinuities such as notches, cracks, or holes. Unlike zigzag theory, which can accommodate spatially-varying layer properties and through-thickness geometry changes, Euler--Bernoulli and Timoshenko theories require alternative approaches to model localized damage.
+
+\subsubsection{Stiffness Reduction Approach}
+
+In the present analysis, the notch is modeled in classical theories through local reduction of the beam's extensional and bending stiffnesses. For a rectangular notch extending from the top surface to depth $d_{\text{notch}}$, the reduced cross-sectional properties in the notched region are:
+
+\textbf{Reduced height:}
+\begin{equation}
+h_{\text{reduced}} = h - d_{\text{notch}} = 1.5 - 1.0 = 0.5 \text{ mm}
+\end{equation}
+
+\textbf{Reduced cross-sectional area:}
+\begin{equation}
+A_{\text{reduced}} = b \cdot h_{\text{reduced}} = 1.0 \times 0.5 = 0.5 \times 10^{-3} \text{ m}^2
+\end{equation}
+
+This represents a 67\% reduction in cross-sectional area compared to the undamaged region.
+
+\textbf{Reduced second moment of area:}
+\begin{equation}
+I_{\text{reduced}} = \frac{b h_{\text{reduced}}^3}{12} = \frac{1.0 \times (0.5 \times 10^{-3})^3}{12} = 1.04 \times 10^{-11} \text{ m}^4
+\end{equation}
+
+The second moment of area experiences a more dramatic reduction of 92\% relative to the undamaged section, as it scales with the cube of the height. Consequently, the notch creates a substantially more compliant region for bending deformation than for axial deformation.
+
+In the finite element implementation, elements located within the notch region ($x_{\text{notch}} - w_{\text{notch}}/2 \leq x \leq x_{\text{notch}} + w_{\text{notch}}/2$) are assigned the reduced stiffness values:
+\begin{align}
+(EA)_{\text{notch}} &= E \cdot A_{\text{reduced}} = 70 \times 10^9 \times 0.5 \times 10^{-3} = 3.5 \times 10^7 \text{ N} \\
+(EI)_{\text{notch}} &= E \cdot I_{\text{reduced}} = 70 \times 10^9 \times 1.04 \times 10^{-11} = 7.3 \times 10^{-1} \text{ N·m}^2
+\end{align}
+
+\subsubsection{Limitations of the Stiffness Reduction Approach}
+
+While computationally straightforward, the stiffness reduction method possesses several fundamental limitations that compromise its accuracy for wave propagation analysis:
+
+\begin{enumerate}
+    \item \textbf{Smeared damage representation:} The approach distributes the notch's effect over the element length, failing to capture the sharp geometric discontinuity at the notch edges. In reality, stress concentrations occur at these edges, generating localized wave scattering that cannot be represented by a smooth stiffness variation.
+
+    \item \textbf{Neglect of through-thickness effects:} The reduction in cross-sectional properties is calculated assuming the neutral axis shifts to the mid-height of the reduced section. However, the true stress and displacement distributions near the notch exhibit complex three-dimensional patterns that single-valued stiffness parameters cannot capture.
+
+    \item \textbf{Inadequate mode conversion modeling:} When a Lamb wave encounters a notch, the geometric asymmetry induces mode conversion between symmetric and antisymmetric modes. The stiffness reduction approach cannot represent this phenomenon because it treats the notch as a modification of global beam properties rather than a localized scattering center.
+
+    \item \textbf{Missing local resonances:} The notch cavity can support local resonant modes at frequencies related to the notch dimensions. These resonances contribute to the scattered wavefield but are absent in the reduced-stiffness representation.
+
+    \item \textbf{Frequency-dependent accuracy:} The effectiveness of the stiffness reduction approximation degrades as frequency increases and wavelengths become comparable to the notch dimensions. At 100 kHz, the $A_0$ mode wavelength ($\sim$20--30 mm) is only 20--30 times the notch width, making the scattering behavior sensitive to the precise geometric details that the stiffness reduction method omits.
+\end{enumerate}
+
+These limitations establish the expectation that Euler--Bernoulli and Timoshenko theories, despite incorporating the notch through stiffness reduction, will exhibit significant discrepancies from the true wave behavior, particularly regarding scattered and mode-converted wave components.
+
+\subsection{Comparative Response Analysis}
+
+Figure~\ref{fig:theory_comparison_responses} presents the time-domain displacement responses predicted by the three beam theories at the sensor location ($x = 1.95$ m, $z = 0.75$ mm). The responses are normalized by their respective maximum absolute values to facilitate comparison of waveform shapes and arrival times.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{\centering\vspace{6cm}PLACEHOLDER FIGURE\\Three-panel comparison showing:\\Panel (a): Euler--Bernoulli response\\Panel (b): Timoshenko response\\Panel (c): Zigzag response\\Each panel: Displacement vs. Time (0--300 $\mu$s)\\Key features to show:\\- Direct arrival wave packets (S$_0$ and A$_0$ modes)\\- Notch-scattered waves\\- Mode-converted components\\- Differences in arrival times and amplitudes\\\vspace{6cm}}}
+\caption{Comparative time-domain responses at sensor location (x=1.95~m, z=0.75~mm) predicted by (a)~Euler--Bernoulli, (b)~Timoshenko, and (c)~zigzag beam theories. Responses are normalized to unit maximum amplitude.}
+\label{fig:theory_comparison_responses}
+\end{figure}
+
+The responses exhibit several distinct wave packets corresponding to different propagation paths and mode types. The earliest arrivals correspond to the directly transmitted waves that propagate from the actuators to the sensor, passing through the notch region. Analysis of these arrivals reveals systematic differences among the three theories.
+
+The symmetric mode ($S_0$) arrives first due to its higher group velocity at 100 kHz. In aluminum at this frequency, the $S_0$ mode travels at approximately 5300 m/s. Euler--Bernoulli theory predicts the wave speed as $c_L = \sqrt{E/\rho} = 5090$ m/s, underestimating the true $S_0$ velocity by approximately 4\%. Timoshenko theory yields improved $S_0$ representation through the coupling between shear and bending in its governing equations. Zigzag theory accurately captures the $S_0$ mode characteristics because its piecewise-cubic displacement field can represent the predominantly extensional motion pattern of this mode.
+
+The antisymmetric mode ($A_0$) exhibits strong flexural character at 100 kHz, traveling significantly slower than $S_0$ with group velocity near 2700 m/s. Euler--Bernoulli theory yields a group velocity of approximately 2450 m/s (9\% underestimation) because it neglects shear deformation. Timoshenko theory substantially improves the $A_0$ prediction with group velocity around 2600 m/s (4\% error), though the constant shear correction factor remains an approximation. Zigzag theory provides the most accurate $A_0$ representation through its layer-wise shear deformation modeling and zigzag function $R^{(k)}(z)$ that captures the through-thickness variation characteristic of this mode.
+
+
+\subsection{Discussion and Selection of Low-Fidelity Model}
+
+The comparative analysis establishes a clear hierarchy of accuracy among the three beam theories for Lamb wave propagation in notched structures.
+
+\textbf{Euler--Bernoulli theory} provides the simplest model but its fundamental assumptions—neglect of shear deformation and rotary inertia—render it inadequate for Lamb wave analysis at structural health monitoring frequencies. The theory systematically underestimates wave velocities, particularly for the $A_0$ mode, and completely fails to capture mode conversion at damage sites.
+
+\textbf{Timoshenko theory} offers improvements by incorporating shear deformation and rotary inertia. However, critical limitations remain: the constant shear correction factor cannot capture frequency-dependent or mode-dependent shear behavior; the notch modeling through stiffness reduction remains approximate; and mode conversion at damage sites is not represented.
+
+\textbf{Zigzag theory} demonstrates superior accuracy through its layerwise displacement representation. The piecewise-cubic through-thickness displacement field accurately captures both symmetric and antisymmetric wave mode shapes. Most importantly, the coupling introduced by the zigzag function enables representation of mode conversion and complex scattering at damage sites, phenomena essential for damage detection but absent from classical theories. While zigzag theory requires approximately twice the computational effort of Euler--Bernoulli theory, it remains orders of magnitude faster than two-dimensional finite element analysis (factor of 200--300), making it feasible for generating large training datasets.
+
+\subsubsection{Justification for Zigzag Theory Selection}
+
+The multi-fidelity surrogate modeling framework relies on establishing a correlation between low- and high-fidelity model predictions. Successful correlation requires that the low-fidelity model captures the essential physics of the problem, even if quantitative accuracy is imperfect.
+
+Zigzag theory satisfies this requirement by representing the key physical mechanisms: (1) realistic dispersion characteristics for both $S_0$ and $A_0$ modes, (2) through-thickness displacement distributions that approximate true Lamb wave mode shapes, (3) reflection, transmission, and mode conversion at damage sites, and (4) physically consistent parametric trends with damage parameters. By contrast, the deficiencies of Euler--Bernoulli and Timoshenko theories—particularly the absence of mode conversion—would create a fundamental mismatch between low- and high-fidelity predictions, manifesting as poor correlation and degraded surrogate model performance.
+
+Based on the comparative analysis, \textbf{zigzag beam theory is selected as the low-fidelity model} for the multi-fidelity surrogate framework. The theory achieves the necessary balance between accuracy and computational efficiency, capturing the essential physics of Lamb wave propagation and wave-damage interaction while maintaining computational cost three orders of magnitude below two-dimensional finite element analysis. The subsequent section establishes the high-fidelity reference model based on two-dimensional elasticity theory.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 
 \section{2D Elastic Beam Theory}
