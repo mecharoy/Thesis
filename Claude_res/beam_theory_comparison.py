@@ -549,76 +549,80 @@ def euler_bernoulli_element_matrices(L_e, A, I, E, rho):
     """
     Compute element stiffness and mass matrices for Euler-Bernoulli beam theory
     Using Hermite cubic shape functions (C¹ continuity)
+    DOF ordering: [u1, w1, dw/dx1, u2, w2, dw/dx2] for proper global assembly
     """
     # Element stiffness matrix (6x6 for 2 nodes, 3 DOFs per node: u, w, dw/dx)
     K_e = np.zeros((6, 6), dtype=dtype)
 
-    # Axial stiffness (EA/L)
+    # Axial stiffness (EA/L) - DOFs 0 and 3 are axial displacements
     K_axial = E * A / L_e
     K_e[0, 0] = K_axial
-    K_e[1, 1] = K_axial
-    K_e[0, 1] = -K_axial
-    K_e[1, 0] = -K_axial
+    K_e[0, 3] = -K_axial
+    K_e[3, 0] = -K_axial
+    K_e[3, 3] = K_axial
 
     # Bending stiffness (EI/L³ terms)
+    # DOFs 1,2 are w1, dw/dx1 at node 1
+    # DOFs 4,5 are w2, dw/dx2 at node 2
     K_bend = E * I / L_e**3
-    K_e[2, 2] = 12 * K_bend
-    K_e[2, 3] = 6 * K_bend * L_e
-    K_e[2, 4] = -12 * K_bend
-    K_e[2, 5] = 6 * K_bend * L_e
+    
+    K_e[1, 1] = 12 * K_bend
+    K_e[1, 2] = 6 * K_bend * L_e
+    K_e[1, 4] = -12 * K_bend
+    K_e[1, 5] = 6 * K_bend * L_e
 
-    K_e[3, 2] = 6 * K_bend * L_e
-    K_e[3, 3] = 4 * K_bend * L_e**2
-    K_e[3, 4] = -6 * K_bend * L_e
-    K_e[3, 5] = 2 * K_bend * L_e**2
+    K_e[2, 1] = 6 * K_bend * L_e
+    K_e[2, 2] = 4 * K_bend * L_e**2
+    K_e[2, 4] = -6 * K_bend * L_e
+    K_e[2, 5] = 2 * K_bend * L_e**2
 
-    K_e[4, 2] = -12 * K_bend
-    K_e[4, 3] = -6 * K_bend * L_e
+    K_e[4, 1] = -12 * K_bend
+    K_e[4, 2] = -6 * K_bend * L_e
     K_e[4, 4] = 12 * K_bend
     K_e[4, 5] = -6 * K_bend * L_e
 
-    K_e[5, 2] = 6 * K_bend * L_e
-    K_e[5, 3] = 2 * K_bend * L_e**2
+    K_e[5, 1] = 6 * K_bend * L_e
+    K_e[5, 2] = 2 * K_bend * L_e**2
     K_e[5, 4] = -6 * K_bend * L_e
     K_e[5, 5] = 4 * K_bend * L_e**2
 
     # Element mass matrix (consistent mass matrix)
     M_e = np.zeros((6, 6), dtype=dtype)
 
-    # Axial mass (ρAL/6)
+    # Axial mass (ρAL/6) - DOFs 0 and 3
     M_axial = rho * A * L_e / 6
     M_e[0, 0] = 2 * M_axial
-    M_e[1, 1] = 2 * M_axial
-    M_e[0, 1] = M_axial
-    M_e[1, 0] = M_axial
+    M_e[0, 3] = M_axial
+    M_e[3, 0] = M_axial
+    M_e[3, 3] = 2 * M_axial
 
     # Bending and rotational mass
     M_bend = rho * A * L_e / 420
     M_rot = rho * I / L_e
 
-    # Transverse mass
-    M_e[2, 2] = 156 * M_bend
-    M_e[2, 3] = 22 * M_bend * L_e
-    M_e[2, 4] = 54 * M_bend
-    M_e[2, 5] = -13 * M_bend * L_e
+    # Transverse mass - DOFs 1,2,4,5
+    M_e[1, 1] = 156 * M_bend
+    M_e[1, 2] = 22 * M_bend * L_e
+    M_e[1, 4] = 54 * M_bend
+    M_e[1, 5] = -13 * M_bend * L_e
 
-    M_e[3, 2] = 22 * M_bend * L_e
-    M_e[3, 3] = 4 * M_bend * L_e**2
-    M_e[3, 4] = 13 * M_bend * L_e
-    M_e[3, 5] = -3 * M_bend * L_e**2
+    M_e[2, 1] = 22 * M_bend * L_e
+    M_e[2, 2] = 4 * M_bend * L_e**2
+    M_e[2, 4] = 13 * M_bend * L_e
+    M_e[2, 5] = -3 * M_bend * L_e**2
 
-    M_e[4, 2] = 54 * M_bend
-    M_e[4, 3] = 13 * M_bend * L_e
+    M_e[4, 1] = 54 * M_bend
+    M_e[4, 2] = 13 * M_bend * L_e
     M_e[4, 4] = 156 * M_bend
     M_e[4, 5] = -22 * M_bend * L_e
 
-    M_e[5, 2] = -13 * M_bend * L_e
-    M_e[5, 3] = -3 * M_bend * L_e**2
+    M_e[5, 1] = -13 * M_bend * L_e
+    M_e[5, 2] = -3 * M_bend * L_e**2
     M_e[5, 4] = -22 * M_bend * L_e
     M_e[5, 5] = 4 * M_bend * L_e**2
 
-    # Rotational inertia (diagonal terms)
-    M_e[3, 3] += 2 * M_rot * L_e / 15
+    # Rotational inertia (diagonal terms) - DOFs 2 and 5
+    M_e[2, 2] += 2 * M_rot * L_e / 15
     M_e[5, 5] += 2 * M_rot * L_e / 15
 
     return K_e, M_e
